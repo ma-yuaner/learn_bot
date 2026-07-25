@@ -144,8 +144,10 @@ button { cursor: pointer; }
 .workbench { display: grid; grid-template-columns: .8fr 1.2fr; background: var(--ink); color: white; }
 .controls { padding: 30px; display: grid; gap: 18px; }
 .controls label { display: grid; gap: 8px; color: #c9d0ca; font-size: 12px; }
-.controls input { padding: 12px; border: 1px solid #4a554e; background: #222d27; color: white; }
+.controls input, .controls select { padding: 12px; border: 1px solid #4a554e; background: #222d27; color: white; }
 .controls input[type="range"] { padding: 0; accent-color: var(--coral); }
+.controls input[type="checkbox"] { width: 17px; height: 17px; padding: 0; accent-color: var(--coral); }
+.controls .toggle-label { display: flex; grid-template-columns: none; align-items: center; }
 .controls output { color: #efc976; }
 .terminal { margin: 17px; padding: 20px; background: #0e1511; border: 1px solid #39433d; font-family: ui-monospace, monospace; }
 .terminal-title { color: #78867d; font-size: 10px; letter-spacing: .15em; }

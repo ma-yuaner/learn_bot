@@ -2,9 +2,13 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { assessmentLevels, firstLesson, pythonLessons, tracks } from "../data/curriculum.js";
 
-test("课程地图覆盖全部培训主题", () => {
-  assert.equal(tracks.length, 11);
+test("课程地图覆盖培训主题和现代 AI 工程补充路线", () => {
+  assert.equal(tracks.length, 21);
   assert.ok(tracks.every((track) => track.id && track.title && track.chapters.length > 0));
+  const ids = new Set(tracks.map((track) => track.id));
+  for (const required of ["git", "engineering", "web-api", "deployment", "security", "mlops", "llm", "rag", "agent", "ai-evaluation"]) {
+    assert.ok(ids.has(required), `缺少扩展区域：${required}`);
+  }
 });
 
 test("首关具备完整的学习闭环", () => {
@@ -28,7 +32,7 @@ test("考核覆盖知识点到面试的完整层级", () => {
 });
 
 test("每个 Python 关卡都符合可复用课程协议", () => {
-  assert.equal(pythonLessons.length, 2);
+  assert.equal(pythonLessons.length, 3);
   const ids = new Set();
   for (const lesson of pythonLessons) {
     assert.ok(!ids.has(lesson.id), `关卡 ID 重复：${lesson.id}`);

@@ -168,11 +168,27 @@ function renderWorkbench(kind) {
     return;
   }
 
+  if (kind === "expressions") {
+    controls.innerHTML = `
+      <label>物品单价 price<input id="price-input" type="number" value="19" min="0" max="999" /></label>
+      <label>购买数量 count<input id="count-input" type="number" value="3" min="1" max="99" /></label>
+      <label>优惠金额 coupon<input id="coupon-input" type="number" value="5" min="0" max="999" /></label>
+      <button class="primary-button" id="run-workbench">计算表达式 <span>▶</span></button>
+    `;
+    return;
+  }
+
   controls.innerHTML = `
-    <label>物品单价 price<input id="price-input" type="number" value="19" min="0" max="999" /></label>
-    <label>购买数量 count<input id="count-input" type="number" value="3" min="1" max="99" /></label>
-    <label>优惠金额 coupon<input id="coupon-input" type="number" value="5" min="0" max="999" /></label>
-    <button class="primary-button" id="run-workbench">计算表达式 <span>▶</span></button>
+    <label>当前能量 energy<input id="branch-energy-input" type="number" value="60" min="0" max="100" /></label>
+    <label>天气 weather
+      <select id="weather-input">
+        <option value="sunny">晴天 sunny</option>
+        <option value="rain" selected>下雨 rain</option>
+        <option value="storm">暴风 storm</option>
+      </select>
+    </label>
+    <label class="toggle-label"><input id="map-input" type="checkbox" checked /> 已携带地图 has_map</label>
+    <button class="primary-button" id="run-workbench">判断行动路径 <span>▶</span></button>
   `;
 }
 
@@ -320,7 +336,7 @@ function runWorkbench() {
       <div class="trace-row"><span>supply · int</span><b>${supply}</b></div>
       <div class="trace-row"><span>计算规则</span><b>min(100, energy + supply)</b></div>
     `;
-  } else {
+  } else if (lesson.lab.kind === "expressions") {
     const price = Math.max(0, Number(document.querySelector("#price-input").value) || 0);
     const count = Math.max(1, Math.floor(Number(document.querySelector("#count-input").value) || 1));
     const coupon = Math.max(0, Number(document.querySelector("#coupon-input").value) || 0);
@@ -333,6 +349,28 @@ function runWorkbench() {
       <div class="trace-row"><span>第二步</span><b>${subtotal} - ${coupon} = ${total}</b></div>
       <div class="trace-row"><span>比较表达式</span><b>${total} >= 50 → ${freeShipping}</b></div>
       <div class="trace-row"><span>结果类型</span><b>number, number, bool</b></div>
+    `;
+  } else {
+    const energy = Math.max(0, Math.min(100, Number(document.querySelector("#branch-energy-input").value) || 0));
+    const weather = document.querySelector("#weather-input").value;
+    const hasMap = document.querySelector("#map-input").checked;
+    const canExpedition = energy >= 80 && weather === "sunny" && hasMap;
+    const canTrain = energy >= 50 && weather !== "storm";
+    let action = "休息";
+    let path = "else";
+    if (canExpedition) {
+      action = "远征";
+      path = "if";
+    } else if (canTrain) {
+      action = "训练";
+      path = "elif";
+    }
+    output = `行动：${action}\n命中路径：${path}\n最终状态：${action === "休息" ? "恢复能量" : "消耗能量"}`;
+    trace = `
+      <div class="trace-row"><span>if 条件</span><b>${energy} >= 80 and ${weather} == sunny and ${hasMap} → ${canExpedition}</b></div>
+      <div class="trace-row"><span>elif 条件</span><b>${energy} >= 50 and ${weather} != storm → ${canTrain}</b></div>
+      <div class="trace-row"><span>命中分支</span><b>${path} → ${action}</b></div>
+      <div class="trace-row"><span>路径规则</span><b>命中后不再检查后续分支</b></div>
     `;
   }
 

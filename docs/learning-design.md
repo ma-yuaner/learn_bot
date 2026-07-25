@@ -64,10 +64,12 @@
 
 ## 内容路线
 
-现有资料被组织为 11 个区域：装备环境、Linux、Shell、Python、算法与数据结构、MySQL、NumPy/Pandas、数学基础、机器学习、PyTorch、CNN/RNN。
+现有培训资料被组织为 11 个基础区域：装备环境、Linux、Shell、Python、算法与数据结构、MySQL、NumPy/Pandas、数学基础、机器学习、PyTorch、CNN/RNN。
+
+为了达到可独立构建现代 AI 产品的目标，另设 10 个工程区域：Git、软件工程、Web API 与后端、Docker 与部署、安全、MLOps、LLM 应用、RAG、Agent、AI 评估与可观测性。
 
 推荐学习顺序不是机械照着文件名走，而是：
 
-环境 → Linux → Shell → Python → 算法 / MySQL → NumPy/Pandas → 数学 → 机器学习 → PyTorch → CNN/RNN。
+环境 → Linux → Shell → Git → Python → 工程实践 → 算法 / MySQL → NumPy/Pandas → 数学 → 机器学习 → PyTorch → CNN/RNN → Web API → Docker/部署 → MLOps → LLM → RAG → Agent → AI 评估与安全。
 
 每完成一个区域，都要产出一个可运行的小项目；最终项目是一个具备数据处理、模型训练、评估和服务化能力的 AI 应用。

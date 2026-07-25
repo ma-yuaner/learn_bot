@@ -21,9 +21,10 @@ npm test
 
 ## 当前版本
 
-- 11 个学习区域的完整课程地图
+- 21 个学习区域：11 个培训基础区域与 10 个现代 AI 工程补充区域
 - Python 第一关：程序、值与变量
 - Python 第二关：运算符、表达式与类型转换
+- Python 第三关：条件判断与程序分支
 - 数据驱动的多关卡引擎与每关独立进度
 - 输出预测实验
 - 变量状态工作台
@@ -35,7 +36,7 @@ npm test
 - 全知识面覆盖矩阵与统一完成标准
 - GitHub Actions 持续集成
 
-详细设计见 [docs/learning-design.md](docs/learning-design.md)，开发覆盖情况见 [docs/coverage-matrix.md](docs/coverage-matrix.md)。
+详细设计见 [docs/learning-design.md](docs/learning-design.md)，开发覆盖情况见 [docs/coverage-matrix.md](docs/coverage-matrix.md)，平台能力规划见 [docs/product-roadmap.md](docs/product-roadmap.md)。
 
 ## 内容原则
 

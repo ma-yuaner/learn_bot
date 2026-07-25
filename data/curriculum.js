@@ -87,6 +87,86 @@ export const tracks = [
     source: "CNN / RNN",
     description: "从神经网络基础走向图像与序列建模，并能定位训练问题。",
     chapters: ["神经网络基础", "卷积与特征图", "CNN 架构", "序列数据", "RNN", "LSTM / GRU", "训练诊断", "综合任务"]
+  },
+  {
+    id: "git",
+    icon: "Git",
+    title: "版本控制港",
+    source: "AI 工程补充路线",
+    description: "用 Git 保存演进历史，通过分支、评审与 CI 建立可靠协作流程。",
+    chapters: ["版本与仓库", "提交", "分支与合并", "远程仓库", "冲突处理", "Pull Request", "GitHub Actions"]
+  },
+  {
+    id: "engineering",
+    icon: "SE",
+    title: "工程实践城",
+    source: "AI 工程补充路线",
+    description: "学习项目结构、测试、日志、配置、调试、依赖管理与代码质量。",
+    chapters: ["项目结构", "依赖与环境", "单元测试", "集成测试", "调试", "日志与配置", "重构与评审"]
+  },
+  {
+    id: "web-api",
+    icon: "API",
+    title: "服务接口站",
+    source: "AI 工程补充路线",
+    description: "理解 HTTP、REST、后端服务、身份认证和数据库如何组成可调用的 AI 产品。",
+    chapters: ["网络与 HTTP", "REST API", "FastAPI", "参数与校验", "数据库访问", "认证与权限", "异步任务", "接口测试"]
+  },
+  {
+    id: "deployment",
+    icon: "Ops",
+    title: "部署云港",
+    source: "AI 工程补充路线",
+    description: "把本地程序封装、配置、发布并稳定运行在服务器和云环境。",
+    chapters: ["Docker", "镜像与容器", "Compose", "环境变量", "反向代理", "CI/CD", "云部署", "监控与回滚"]
+  },
+  {
+    id: "security",
+    icon: "Sec",
+    title: "安全边境",
+    source: "AI 工程补充路线",
+    description: "保护密钥、数据、接口与代码执行环境，建立威胁意识和最小权限原则。",
+    chapters: ["密钥管理", "输入校验", "认证与授权", "依赖安全", "代码沙箱", "隐私与脱敏", "提示注入防御"]
+  },
+  {
+    id: "mlops",
+    icon: "MLO",
+    title: "MLOps 中枢",
+    source: "AI 工程补充路线",
+    description: "管理数据、实验、模型、部署和漂移，让机器学习系统可以持续迭代。",
+    chapters: ["实验追踪", "数据版本", "特征流水线", "模型注册", "训练编排", "服务部署", "漂移监控", "再训练"]
+  },
+  {
+    id: "llm",
+    icon: "LLM",
+    title: "大模型天文台",
+    source: "生成式 AI 补充路线",
+    description: "理解 Token、Transformer、上下文、推理参数、提示设计和结构化输出。",
+    chapters: ["Token 与上下文", "Transformer 直觉", "模型调用", "提示设计", "结构化输出", "工具调用", "缓存与成本"]
+  },
+  {
+    id: "rag",
+    icon: "RAG",
+    title: "知识检索深井",
+    source: "生成式 AI 补充路线",
+    description: "构建从文档处理、向量检索到有依据回答的完整知识系统。",
+    chapters: ["文档解析", "切分", "Embedding", "向量数据库", "召回", "重排", "生成", "引用与评估"]
+  },
+  {
+    id: "agent",
+    icon: "Agt",
+    title: "智能体工坊",
+    source: "生成式 AI 补充路线",
+    description: "设计具备工具、状态、计划、记忆和安全边界的可控 Agent。",
+    chapters: ["Agent 循环", "工具协议", "状态与记忆", "规划", "多步骤执行", "失败恢复", "权限边界", "人工确认"]
+  },
+  {
+    id: "ai-evaluation",
+    icon: "Eval",
+    title: "评估观测塔",
+    source: "生成式 AI 补充路线",
+    description: "用数据集、指标、追踪和人工标准证明 AI 系统是否正确、稳定且值得上线。",
+    chapters: ["评估目标", "测试集", "确定性指标", "LLM 评审", "人工评审", "链路追踪", "回归测试", "线上反馈"]
   }
 ];
 
@@ -269,7 +349,100 @@ export const secondLesson = {
   ]
 };
 
-export const pythonLessons = [firstLesson, secondLesson];
+export const thirdLesson = {
+  id: "python-branches",
+  trackId: "python",
+  title: "03 · 条件判断与程序分支",
+  duration: "50–65 分钟",
+  objectives: [
+    "说明条件表达式如何决定程序执行路径",
+    "正确使用 if、elif 和 else，并理解互斥分支",
+    "使用 and、or、not 组合边界条件",
+    "通过真值表和路径追踪检查遗漏与不可达分支"
+  ],
+  concepts: [
+    {
+      term: "条件",
+      detail: "if 后面需要一个能够判断真假的表达式。结果为真时进入缩进代码块，为假时跳过该块。"
+    },
+    {
+      term: "分支",
+      detail: "分支让同一程序根据状态选择不同路径。if/elif/else 链从上到下检查，命中第一个为真的条件后便不再检查后续分支。"
+    },
+    {
+      term: "缩进",
+      detail: "Python 使用缩进表示代码块。属于同一分支的语句必须保持一致缩进；缩进不是排版偏好，而是语法结构。"
+    },
+    {
+      term: "边界",
+      detail: "条件最容易在边界值出错。例如 60 分是否及格，必须明确使用 >= 60 还是 > 60，并测试边界两侧。"
+    }
+  ],
+  types: [
+    ["if", "首个条件", "if energy >= 60:", "条件为真时进入"],
+    ["elif", "追加条件", "elif energy >= 30:", "前面未命中才检查"],
+    ["else", "兜底路径", "else:", "前面全部为假时进入"],
+    ["组合", "and / or / not", "sunny and energy > 0", "复杂条件建议拆成命名变量"]
+  ],
+  referenceTitle: "分支链的四个关键结构",
+  referenceDescription: "先定义互斥区间，再从最严格条件向下排列。",
+  prediction: {
+    code: `energy = 60\nweather = "rain"\nif energy >= 80 and weather == "sunny":\n    action = "远征"\nelif energy >= 50:\n    action = "训练"\nelse:\n    action = "休息"\nprint(action)`,
+    choices: ["远征", "训练", "休息"],
+    answer: "训练",
+    explanation: "第一个条件虽然能量比较失败，而且天气也不是 sunny，因此为 False；第二个条件 60 >= 50 为 True，进入“训练”分支，后续 else 不再执行。"
+  },
+  quiz: [
+    {
+      question: "score 恰好为 60，要求 60 分及以上及格，应使用哪个条件？",
+      options: ["score > 60", "score >= 60", "score == 60"],
+      answer: 1,
+      reason: "“及以上”包含边界值 60，因此应使用 >=。"
+    },
+    {
+      question: "if/elif/else 链中两个条件都为 True，会执行几个分支？",
+      options: ["只执行第一个命中的分支", "两个都执行", "只执行最后一个"],
+      answer: 0,
+      reason: "这是互斥分支链。命中第一个 True 后，后续 elif 和 else 都会跳过。"
+    },
+    {
+      question: "表示“有钥匙并且门没有锁”的条件是？",
+      options: ["has_key or not locked", "has_key and not locked", "not has_key and locked"],
+      answer: 1,
+      reason: "两个要求必须同时满足，所以使用 and；“没有锁”写作 not locked。"
+    },
+    {
+      question: "检查分支边界最有效的一组数据是什么？",
+      options: ["只测一个正常值", "边界值及其前后相邻值", "只测最大值"],
+      answer: 1,
+      reason: "边界值、边界前和边界后能够暴露 > 与 >=、区间重叠或遗漏问题。"
+    }
+  ],
+  lab: {
+    kind: "conditions",
+    title: "路径决策台",
+    subtitle: "改变状态，追踪程序选择了哪条路径"
+  },
+  debugChallenge: {
+    code: `score = 85\nif score >= 60:\n    grade = "及格"\nelif score >= 80:\n    grade = "优秀"\nprint(grade)`,
+    question: "为什么 85 分只得到“及格”？",
+    choices: ["elif 永远不能比较数字", "较宽的条件先命中，使优秀分支不可达", "score 应该写成字符串"],
+    answer: 1,
+    fix: `if score >= 80:\n    grade = "优秀"\nelif score >= 60:\n    grade = "及格"`,
+    explanation: "85 同时满足 >= 60 和 >= 80，但程序只执行第一个命中的分支。应先检查更严格、更窄的 >= 80，再检查 >= 60。"
+  },
+  explanationChallenge: "为什么 if score >= 60 写在 if score >= 80 前面会导致“优秀”分支不可达？如何系统检查这类问题？",
+  explanationHint: "建议提到：从上到下、第一个 True、区间包含、边界测试……",
+  evaluationGroups: [
+    ["从上到下", "顺序"],
+    ["第一个", "命中"],
+    ["包含", "范围", "区间"],
+    ["不可达", "跳过"],
+    ["边界", "测试"]
+  ]
+};
+
+export const pythonLessons = [firstLesson, secondLesson, thirdLesson];
 
 export const assessmentLevels = [
   {
