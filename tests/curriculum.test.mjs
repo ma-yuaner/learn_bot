@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { firstLesson, tracks } from "../data/curriculum.js";
+import { assessmentLevels, firstLesson, tracks } from "../data/curriculum.js";
 
 test("课程地图覆盖全部培训主题", () => {
   assert.equal(tracks.length, 11);
@@ -20,4 +20,9 @@ test("每道题都有合法答案与反馈", () => {
     assert.ok(question.options[question.answer]);
     assert.ok(question.reason.length > 10);
   }
+});
+
+test("考核覆盖知识点到面试的完整层级", () => {
+  assert.deepEqual(assessmentLevels.map((item) => item.level), ["L1", "L2", "L3", "L4", "L5"]);
+  assert.ok(assessmentLevels.every((item) => item.evidence && item.pass));
 });

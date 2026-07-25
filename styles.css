@@ -95,7 +95,7 @@ button { cursor: pointer; }
 .mastery-track { height: 5px; background: #dddcd2; }
 .mastery-track i { display: block; height: 100%; background: var(--gold); }
 
-.lesson-section, .map-section { padding-top: 115px; }
+.lesson-section, .map-section, .assessment-path { padding-top: 115px; }
 .section-heading { display: flex; align-items: flex-start; gap: 17px; margin-bottom: 30px; }
 .section-heading .eyebrow { margin: 1px 0 7px; }
 .section-heading h2 { margin: 0; font: 38px Georgia, "Songti SC", serif; }
@@ -158,6 +158,18 @@ button { cursor: pointer; }
 .explain-card textarea { width: 100%; padding: 15px; resize: vertical; border: 1px solid var(--line); background: #fffef9; line-height: 1.7; margin: 12px 0; }
 .explain-card code { color: var(--coral); }
 
+.path-intro { max-width: 720px; color: var(--muted); line-height: 1.8; margin: -10px 0 26px 60px; }
+.assessment-levels { display: grid; grid-template-columns: repeat(5, 1fr); border: 1px solid var(--line); }
+.assessment-level { padding: 24px 18px; background: rgba(255,255,255,.42); border-right: 1px solid var(--line); min-height: 235px; }
+.assessment-level:last-child { border-right: 0; background: var(--ink); color: white; }
+.assessment-level > span { color: var(--coral); font: 13px Georgia, serif; }
+.assessment-level h3 { font: 20px Georgia, "Songti SC", serif; margin: 12px 0; }
+.assessment-level p { min-height: 58px; color: var(--muted); font-size: 12px; line-height: 1.65; }
+.assessment-level:last-child p { color: #aeb9b2; }
+.assessment-level small { display: block; margin-top: 22px; color: var(--green); font-weight: 800; letter-spacing: .12em; }
+.assessment-level:last-child small { color: #efc976; }
+.assessment-level b { display: block; margin-top: 7px; font-size: 11px; line-height: 1.55; }
+
 .world-map { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .region { min-height: 185px; padding: 22px; border: 1px solid var(--line); background: rgba(255,255,255,.45); position: relative; overflow: hidden; }
 .region.available { background: var(--green); color: white; }
@@ -174,6 +186,8 @@ button { cursor: pointer; }
   .sidebar { display: none; }
   .content { padding-top: 30px; }
   .concept-grid { grid-template-columns: 1fr 1fr; }
+  .assessment-levels { grid-template-columns: 1fr 1fr; }
+  .assessment-level { border-bottom: 1px solid var(--line); }
   .concept-card:nth-child(2) { border-right: 0; }
   .concept-card { border-bottom: 1px solid var(--line); }
   .world-map { grid-template-columns: 1fr 1fr; }
@@ -189,6 +203,9 @@ button { cursor: pointer; }
   .objective-panel { grid-template-columns: 1fr; }
   .objective-panel ul { grid-template-columns: 1fr; }
   .concept-grid, .world-map { grid-template-columns: 1fr; }
+  .assessment-levels { grid-template-columns: 1fr; }
+  .assessment-level { border-right: 0; }
+  .path-intro { margin-left: 0; }
   .concept-card { border-right: 0; }
   .type-row { grid-template-columns: 55px 1fr 1fr; }
   .type-row span:last-child { grid-column: 2 / -1; }

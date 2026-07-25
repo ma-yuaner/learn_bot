@@ -28,9 +28,11 @@ npm test
 - 三题即时测验
 - 费曼解释挑战
 - 本地学习进度和四维掌握度
+- L1–L5 五级考核路线（知识点、模块、框架、综合项目、面试官）
+- 全知识面覆盖矩阵与统一完成标准
 - GitHub Actions 持续集成
 
-详细设计见 [docs/learning-design.md](docs/learning-design.md)。
+详细设计见 [docs/learning-design.md](docs/learning-design.md)，开发覆盖情况见 [docs/coverage-matrix.md](docs/coverage-matrix.md)。
 
 ## 内容原则
 

@@ -152,3 +152,36 @@ export const firstLesson = {
     }
   ]
 };
+
+export const assessmentLevels = [
+  {
+    level: "L1",
+    title: "知识点考核",
+    evidence: "定义、辨析、代码预测、最小操作",
+    pass: "核心测验 ≥ 80%，并完成对应实操"
+  },
+  {
+    level: "L2",
+    title: "模块考核",
+    evidence: "把多个知识点组合成一个可运行功能",
+    pass: "功能通过验收，能够解释输入、处理和输出"
+  },
+  {
+    level: "L3",
+    title: "框架考核",
+    evidence: "架构图、模块边界、数据流、异常流和取舍",
+    pass: "不看答案讲清全流程，并能从零搭出最小骨架"
+  },
+  {
+    level: "L4",
+    title: "综合项目考核",
+    evidence: "跨区域项目、测试、排错、复盘和文档",
+    pass: "独立完成需求，能够证明正确性并分析改进方向"
+  },
+  {
+    level: "L5",
+    title: "面试官关卡",
+    evidence: "限时问答、追问、现场编码、系统设计和项目深挖",
+    pass: "结论正确、推理透明、代码可验证、不会时能合理定位"
+  }
+];

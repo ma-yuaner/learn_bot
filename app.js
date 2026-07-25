@@ -1,4 +1,4 @@
-import { firstLesson, tracks } from "./data/curriculum.js";
+import { assessmentLevels, firstLesson, tracks } from "./data/curriculum.js";
 
 const storageKey = "ai-explorer-progress-v1";
 const defaultProgress = {
@@ -58,6 +58,15 @@ function renderBaseContent() {
       <h3>${track.title}</h3>
       <p>${track.description}</p>
       <small>${track.available ? "首个关卡已开放" : `${track.chapters.length} 个关卡 · 待解锁`}</small>
+    </article>
+  `).join("");
+  document.querySelector("#assessment-levels").innerHTML = assessmentLevels.map((item) => `
+    <article class="assessment-level">
+      <span>${item.level}</span>
+      <h3>${item.title}</h3>
+      <p>${item.evidence}</p>
+      <small>通过标准</small>
+      <b>${item.pass}</b>
     </article>
   `).join("");
   document.querySelector("#quiz-questions").innerHTML = firstLesson.quiz.map((quiz, questionIndex) => `
