@@ -81,6 +81,10 @@ button { cursor: pointer; }
 .tag.coral { color: #8d3925; background: #f9d9cf; }
 .card h2 { font: 34px Georgia, "Songti SC", serif; margin: 24px 0 12px; }
 .card > p { color: var(--muted); line-height: 1.7; }
+.lesson-switcher { display: flex; gap: 7px; margin-top: 20px; }
+.lesson-switcher button { border: 1px solid var(--line); background: transparent; padding: 8px 11px; color: var(--muted); font-size: 11px; }
+.lesson-switcher button span { font-family: Georgia, serif; margin-right: 7px; }
+.lesson-switcher button.active { color: white; background: var(--ink); border-color: var(--ink); }
 .mission-progress { height: 7px; background: #dddcd2; margin: 28px 0 12px; }
 .mission-meta { display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-size: 12px; }
 .primary-button, .secondary-button { border: 0; padding: 12px 17px; font-weight: 700; }
@@ -135,6 +139,7 @@ button { cursor: pointer; }
 .choice.wrong { border-color: var(--coral); background: #f9ded6; }
 .feedback { display: none; margin-top: 15px; padding: 13px; background: #ebe9df; font-size: 12px; line-height: 1.65; }
 .feedback.show { display: block; }
+.feedback code { display: block; margin-top: 8px; color: var(--green); white-space: pre-wrap; }
 
 .workbench { display: grid; grid-template-columns: .8fr 1.2fr; background: var(--ink); color: white; }
 .controls { padding: 30px; display: grid; gap: 18px; }

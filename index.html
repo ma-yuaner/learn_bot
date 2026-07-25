@@ -53,6 +53,7 @@
             </div>
             <h2 id="lesson-title"></h2>
             <p>建立程序执行的第一张心智地图。完成后，你应该可以不运行代码就追踪变量的变化。</p>
+            <div class="lesson-switcher" id="lesson-switcher" aria-label="Python 关卡"></div>
             <div class="mission-progress"><i id="mission-progress"></i></div>
             <div class="mission-meta">
               <span id="mission-status">0 / 4 个检查点</span>
@@ -78,12 +79,12 @@
           </div>
           <div class="concept-grid" id="concept-grid"></div>
           <div class="type-table">
-            <div class="table-title"><h3>四种基础值，一次分清</h3><p>类型不是标签装饰，它决定数据可以怎样被使用。</p></div>
+            <div class="table-title"><h3 id="reference-title"></h3><p id="reference-description"></p></div>
             <div id="type-rows"></div>
           </div>
           <label class="checkpoint">
             <input type="checkbox" data-checkpoint="concept" />
-            <span><b>检查点 1</b>我能用自己的话区分程序、解释器、值和变量。</span>
+            <span><b>检查点 1</b><span id="concept-checkpoint-label">我能用自己的话讲清本关的四个核心概念。</span></span>
           </label>
         </section>
 
@@ -110,15 +111,10 @@
         <section class="lesson-section" id="workshop">
           <div class="section-heading">
             <span class="step-number">03</span>
-            <div><p class="eyebrow">变量工作台</p><h2>修改数据，观察程序状态</h2></div>
+            <div><p class="eyebrow" id="lab-title"></p><h2 id="lab-subtitle"></h2></div>
           </div>
           <div class="workbench">
-            <div class="controls">
-              <label>探险家名字<input id="name-input" value="小码" maxlength="12" /></label>
-              <label>初始能量<input id="energy-input" type="number" value="80" min="0" max="100" /></label>
-              <label>补给数量<input id="supply-input" type="range" value="15" min="0" max="30" /><output id="supply-output">15</output></label>
-              <button class="primary-button" id="run-workbench">运行程序 <span>▶</span></button>
-            </div>
+            <div class="controls" id="workbench-controls"></div>
             <div class="terminal">
               <div class="terminal-title"><span></span> OUTPUT</div>
               <pre id="terminal-output">等待运行…</pre>
@@ -127,9 +123,28 @@
           </div>
         </section>
 
-        <section class="lesson-section" id="assessment">
+        <section class="lesson-section" id="debug">
           <div class="section-heading">
             <span class="step-number">04</span>
+            <div><p class="eyebrow">故障调查局</p><h2>读懂错误，而不是绕开错误</h2></div>
+          </div>
+          <div class="lab-grid">
+            <div class="code-window">
+              <div class="window-bar"><span></span><span></span><span></span><b>broken.py</b></div>
+              <pre><code id="debug-code"></code></pre>
+            </div>
+            <div class="challenge-panel">
+              <span class="tag coral">DEBUG</span>
+              <h3 id="debug-question"></h3>
+              <div id="debug-choices" class="choice-list"></div>
+              <div id="debug-feedback" class="feedback" aria-live="polite"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="lesson-section" id="assessment">
+          <div class="section-heading">
+            <span class="step-number">05</span>
             <div><p class="eyebrow">理解度评估</p><h2>证明你真的会了</h2></div>
           </div>
           <div class="assessment-grid">
@@ -142,8 +157,8 @@
             <div class="explain-card">
               <span class="tag">费曼挑战</span>
               <h3>向一个没学过编程的人解释：</h3>
-              <p>为什么 <code>level = level + 1</code> 在程序里成立，而在数学等式里看起来不成立？</p>
-              <textarea id="explanation-input" rows="8" placeholder="请用自己的话回答。建议提到：旧值、计算、赋值、新值……"></textarea>
+              <p id="explanation-question"></p>
+              <textarea id="explanation-input" rows="8"></textarea>
               <button class="secondary-button" id="evaluate-explanation">评估我的解释</button>
               <div id="explanation-feedback" class="feedback" aria-live="polite"></div>
             </div>

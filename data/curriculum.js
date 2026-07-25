@@ -125,6 +125,8 @@ export const firstLesson = {
     ["float", "小数", "3.14", "适合表示连续数值"],
     ["bool", "真假", "True", "只有 True 与 False，首字母大写"]
   ],
+  referenceTitle: "四种基础值，一次分清",
+  referenceDescription: "类型不是标签装饰，它决定数据可以怎样被使用。",
   prediction: {
     code: `name = "探险家"\nlevel = 1\nlevel = level + 1\nprint(f"{name} Lv.{level}")`,
     choices: ["探险家 Lv.1", "探险家 Lv.2", "name Lv.level"],
@@ -150,8 +152,124 @@ export const firstLesson = {
       answer: 2,
       reason: "第二条语句读取旧值 2，乘 3 得到 6，再更新 x。"
     }
+  ],
+  lab: {
+    kind: "variables",
+    title: "变量工作台",
+    subtitle: "修改数据，观察程序状态"
+  },
+  debugChallenge: {
+    code: `energy = 80\nprint("当前能量：" + energy)`,
+    question: "这段代码为什么会报错？",
+    choices: ["energy 没有定义", "字符串不能直接与整数相加", "print 不能输出变量"],
+    answer: 1,
+    fix: `print("当前能量：" + str(energy))`,
+    explanation: "加号两边分别是 str 和 int。Python 不会猜测你想做文本拼接还是数值相加，需要先用 str(energy) 显式转换，或者使用 f 字符串。"
+  },
+  explanationChallenge: "为什么 level = level + 1 在程序里成立，而在数学等式里看起来不成立？",
+  explanationHint: "建议提到：旧值、计算、赋值、新值……",
+  evaluationGroups: [
+    ["赋值", "指向", "保存", "更新"],
+    ["旧值", "原来", "当前"],
+    ["加", "计算", "得到"],
+    ["新值", "变成", "重新"]
   ]
 };
+
+export const secondLesson = {
+  id: "python-expressions",
+  trackId: "python",
+  title: "02 · 运算符、表达式与类型转换",
+  duration: "45–60 分钟",
+  objectives: [
+    "区分运算符、操作数和表达式",
+    "按括号、乘除、加减、比较、逻辑的顺序预测结果",
+    "区分数值运算、比较运算和逻辑运算的结果类型",
+    "读懂 TypeError，并通过显式类型转换修复"
+  ],
+  concepts: [
+    {
+      term: "操作数",
+      detail: "被运算的数据叫操作数。例如 price * count 中，price 和 count 是操作数，星号是运算符。"
+    },
+    {
+      term: "表达式",
+      detail: "值、变量和运算符可以组成表达式。表达式被执行后一定会得到一个值，这个值还拥有明确类型。"
+    },
+    {
+      term: "优先级",
+      detail: "一个表达式有多个运算符时，Python 按优先级决定先后。不要依赖记忆炫技；有歧义时主动加括号表达意图。"
+    },
+    {
+      term: "类型转换",
+      detail: "int()、float()、str() 和 bool() 会创建目标类型的值。外部输入通常是字符串，参与计算前必须先验证再转换。"
+    }
+  ],
+  types: [
+    ["算术", "+ - * / // % **", "数字 → 数字", "/ 总是得到 float"],
+    ["比较", "== != > >= < <=", "任意可比较值 → bool", "比较不是赋值"],
+    ["逻辑", "and or not", "条件 → bool/操作数", "not 优先于 and，and 优先于 or"],
+    ["转换", "int float str bool", "旧类型 → 新类型", "转换失败会抛出异常"]
+  ],
+  referenceTitle: "四组操作，追踪结果类型",
+  referenceDescription: "预测表达式时，同时写下计算结果和结果类型。",
+  prediction: {
+    code: `price = 19\ncount = 3\ncoupon = 5\ntotal = price * count - coupon\nprint(total >= 50 and count > 0)`,
+    choices: ["52", "True", "False"],
+    answer: "True",
+    explanation: "先算 19 × 3 - 5 得到 52；52 >= 50 是 True，3 > 0 也是 True；True and True 最终得到 True。"
+  },
+  quiz: [
+    {
+      question: "7 / 2 的值和类型是什么？",
+      options: ["3，int", "3.5，float", "3，float"],
+      answer: 1,
+      reason: "Python 中 / 是普通除法，结果为 3.5，类型是 float；// 才是向下取整除法。"
+    },
+    {
+      question: "2 + 3 * 4 的结果是什么？",
+      options: ["20", "14", "24"],
+      answer: 1,
+      reason: "乘法优先于加法，所以先算 3 * 4，再加 2。"
+    },
+    {
+      question: "input() 得到的内容默认是什么类型？",
+      options: ["str", "int", "由输入内容自动决定"],
+      answer: 0,
+      reason: "input() 的返回值始终是 str。需要计算时，应验证内容后显式转换。"
+    },
+    {
+      question: "表达式 not False and 3 > 2 的结果是什么？",
+      options: ["False", "True", "3"],
+      answer: 1,
+      reason: "not False 得到 True，3 > 2 也得到 True，所以结果为 True。"
+    }
+  ],
+  lab: {
+    kind: "expressions",
+    title: "表达式实验台",
+    subtitle: "拆分复杂计算，观察中间值和类型"
+  },
+  debugChallenge: {
+    code: `age_text = "18"\nnext_year = age_text + 1`,
+    question: "哪种修复既明确又能完成数值加法？",
+    choices: ["next_year = age_text + \"1\"", "next_year = int(age_text) + 1", "next_year = str(1)"],
+    answer: 1,
+    fix: `next_year = int(age_text) + 1`,
+    explanation: "字符串 \"18\" 代表文本。先用 int() 得到整数 18，再加 1 才是数值运算。拼接 \"1\" 会得到文本 \"181\"。"
+  },
+  explanationChallenge: "为什么从 input() 得到的“18”不能直接加 1？请讲清值、类型、运算意图和修复方式。",
+  explanationHint: "建议提到：input、str、数值加法、int()、转换失败……",
+  evaluationGroups: [
+    ["input", "输入"],
+    ["str", "字符串", "文本"],
+    ["数值", "加法", "计算"],
+    ["int", "转换"],
+    ["异常", "失败", "验证"]
+  ]
+};
+
+export const pythonLessons = [firstLesson, secondLesson];
 
 export const assessmentLevels = [
   {
