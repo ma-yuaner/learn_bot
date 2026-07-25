@@ -644,7 +644,13 @@ function evaluateExplanation() {
   saveState();
   showFeedback(
     document.querySelector("#explanation-feedback"),
-    `<b>表达初评 ${score} / 100</b><br>${missing.length ? `还需要讲清：${missing.join("、")}。` : "关键链路完整。下一步应接受人工追问，验证是否能够迁移。"}<br><small>自动评分只做第一轮筛查，不替代框架考核。</small>`,
+    `<b>表达初评 ${score} / 100</b>
+    <span>${missing.length ? `你的回答还需要讲清：${missing.join("、")}。` : "你的关键推理链已经完整。下一步应接受人工追问，验证是否能够迁移。"}</span>
+    <span class="debug-label">参考答案（不是唯一表述）</span>
+    <span>${lesson.referenceAnswer}</span>
+    <span class="debug-label">下一步</span>
+    <span>对比你的回答与参考答案，用自己的话重新讲一次；不要直接背诵原文。</span>
+    <small>自动评分只做第一轮筛查，不替代框架考核。</small>`,
     score >= 60
   );
 }

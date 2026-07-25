@@ -48,6 +48,7 @@ test("每个 Python 关卡都符合可复用课程协议", () => {
     assert.ok(lesson.debugChallenge.result);
     assert.ok(lesson.quiz.length >= 3);
     assert.ok(lesson.evaluationGroups.length >= 4);
+    assert.ok(lesson.referenceAnswer.length >= 80, `${lesson.id} 缺少完整参考解释`);
     if (lesson.moduleProject) {
       assert.ok(lesson.moduleProject.title.startsWith("L2"));
       assert.ok(lesson.moduleProject.requirements.length >= 5);

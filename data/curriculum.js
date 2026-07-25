@@ -249,6 +249,7 @@ export const firstLesson = {
     explanation: "加号两边分别是 str 和 int。Python 不会猜测你想做文本拼接还是数值相加，需要先用 str(energy) 显式转换，或者使用 f 字符串。"
   },
   explanationChallenge: "为什么 level = level + 1 在程序里成立，而在数学等式里看起来不成立？",
+  referenceAnswer: "程序中的等号表示赋值，不是数学中的恒等关系。执行时先读取 level 的旧值，例如 1；再计算旧值 + 1，得到 2；最后让变量 level 指向新值 2。因此这条语句描述的是“读取 → 计算 → 更新”的时间过程。",
   explanationHint: "建议提到：旧值、计算、赋值、新值……",
   evaluationGroups: [
     ["赋值", "指向", "保存", "更新"],
@@ -343,6 +344,7 @@ export const secondLesson = {
     explanation: "字符串 \"18\" 代表文本。原代码让 str 与 int 使用加号，因此抛出 TypeError。int(age_text) 先得到整数 18，再加 1，最终明确得到整数 19；如果拼接 \"1\"，得到的会是字符串 \"181\"。"
   },
   explanationChallenge: "为什么从 input() 得到的“18”不能直接加 1？请讲清值、类型、运算意图和修复方式。",
+  referenceAnswer: "input() 返回的始终是字符串，所以“18”的类型是 str，而 1 的类型是 int。加号无法确定你想做文本拼接还是数值加法，因此 str 与 int 直接相加会触发 TypeError。若目的是计算下一岁，应先验证输入可以转换，再执行 int(age_text) + 1，最终得到整数 19；无效文本需要捕获 ValueError。",
   explanationHint: "建议提到：input、str、数值加法、int()、转换失败……",
   evaluationGroups: [
     ["input", "输入"],
@@ -438,6 +440,7 @@ export const thirdLesson = {
     explanation: "85 同时满足 >= 60 和 >= 80，但程序只执行第一个命中的分支。应先检查更严格、更窄的 >= 80，再检查 >= 60。"
   },
   explanationChallenge: "为什么 if score >= 60 写在 if score >= 80 前面会导致“优秀”分支不可达？如何系统检查这类问题？",
+  referenceAnswer: "if/elif 链从上到下检查，只执行第一个为 True 的分支。所有大于等于 80 的分数也都大于等于 60，因此会先被“及格”条件截获，后面的“优秀”条件永远没有机会执行。应先检查更窄、更严格的 >= 80，再检查 >= 60，并使用 59、60、79、80 等边界值验证每条路径。",
   explanationHint: "建议提到：从上到下、第一个 True、区间包含、边界测试……",
   evaluationGroups: [
     ["从上到下", "顺序"],
@@ -533,6 +536,7 @@ export const fourthLesson = {
     explanation: "energy - 1 是一个表达式，它得到新值但没有保存。energy 始终是 3，条件永远为 True。需要赋值更新状态。"
   },
   explanationChallenge: "如何证明 while energy >= cost 的循环一定会停止？请说明前提、状态变化、边界和异常输入。",
+  referenceAnswer: "首先必须验证 cost > 0，并且初始 energy 是非负有限数。每轮执行后 energy 都减少固定的正数 cost，所以状态严格向下变化；energy 又以 0 为下界，不可能无限下降而始终满足 energy >= cost。经过有限轮后 energy 必然小于 cost，条件变为 False，循环结束。cost 为 0 或负数必须在循环前拒绝。",
   explanationHint: "建议提到：cost > 0、每轮递减、下界、最终小于 cost……",
   evaluationGroups: [
     ["cost > 0", "正数"],
@@ -639,6 +643,7 @@ export const fifthLesson = {
     explanation: "第一项删除后，第二个 broken 移到索引 0，但循环继续检查下一个索引，于是它被跳过。可以构造过滤后的新列表，或遍历列表副本。"
   },
   explanationChallenge: "为什么 backup = items 后，执行 backup.append(\"rope\") 会同时影响 items？它和字符串“修改”有什么不同？",
+  referenceAnswer: "backup = items 没有复制列表，而是让两个变量指向同一个列表对象。列表是可变对象，append 会原地修改这个共享对象，所以通过 items 也能看到 rope。字符串不可变，任何看似修改字符串的操作都会创建新字符串，再让某个变量指向新值，不会原地改变原字符串对象。",
   explanationHint: "建议提到：同一对象、引用、列表可变、字符串不可变、新值……",
   evaluationGroups: [
     ["同一", "对象"],
@@ -741,6 +746,7 @@ export const sixthLesson = {
     explanation: "函数内部虽然计算出 result，但没有 return。Python 自动返回 None，外部 energy 因此得到 None；None 与整数 1 不能相加。"
   },
   explanationChallenge: "为什么函数内部算出了 result，调用者仍然拿不到它？请讲清局部变量、return、None 和调用边界。",
+  referenceAnswer: "result 是函数调用内部的局部变量，只在函数作用域内可见。计算出 result 并不等于把它交给调用者；函数必须通过 return 明确跨越调用边界返回结果。没有显式 return 时，Python 自动返回 None，因此外部变量接收到的是 None。函数接口应清楚规定参数要求和返回值保证。",
   explanationHint: "建议提到：局部作用域、显式 return、调用结果、None……",
   evaluationGroups: [
     ["局部", "作用域"],
@@ -843,6 +849,7 @@ export const seventhLesson = {
     explanation: "\"优秀\" 不符合浮点数字格式，float() 明确抛出 ValueError。正确做法是捕获这个具体异常并记录无效原因，而不是删除转换或吞掉错误。"
   },
   explanationChallenge: "为什么 except: pass 会让程序看似稳定却更难维护？怎样决定捕获范围和异常类型？",
+  referenceAnswer: "except: pass 会捕获并丢弃几乎所有异常，既可能隐藏可预期的输入错误，也可能掩盖拼写、类型和程序逻辑缺陷，导致错误数据继续传播。应只把可能失败的最小操作放进 try，捕获已知且能够处理的具体异常，例如 float(text) 对应 ValueError，并记录输入、行号和原因。无法正确恢复的异常应继续抛出或终止流程。",
   explanationHint: "建议提到：隐藏缺陷、具体操作、具体异常、记录证据、继续或终止……",
   evaluationGroups: [
     ["隐藏", "吞掉"],
