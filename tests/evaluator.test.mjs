@@ -59,3 +59,27 @@ def analyze_scores(scores):
   assert.equal(result.ok, true);
   assert.ok(result.results.every((item) => item.passed));
 });
+
+test("分数文本解析挑战处理异常、空行与范围边界", () => {
+  const result = evaluate(`
+def parse_score_lines(lines):
+    scores = []
+    invalid = 0
+    for line in lines:
+        text = line.strip()
+        if not text:
+            continue
+        try:
+            score = float(text)
+        except ValueError:
+            invalid = invalid + 1
+            continue
+        if 0 <= score <= 100:
+            scores.append(score)
+        else:
+            invalid = invalid + 1
+    return {"scores": scores, "invalid": invalid}
+  `.trim(), "parse-score-lines");
+  assert.equal(result.ok, true);
+  assert.ok(result.results.every((item) => item.passed));
+});

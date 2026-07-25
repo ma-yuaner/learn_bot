@@ -23,6 +23,15 @@ CHALLENGES = {
             {"name": "通过边界", "args": [[60]], "expected": {"total": 60, "average": 60, "passed": True}, "visible": False},
             {"name": "小数平均值", "args": [[59, 60]], "expected": {"total": 119, "average": 59.5, "passed": False}, "visible": False},
         ],
+    },
+    "parse-score-lines": {
+        "function": "parse_score_lines",
+        "tests": [
+            {"name": "混合内容", "args": [["80", "bad", "", "60"]], "expected": {"scores": [80, 60], "invalid": 1}, "visible": True},
+            {"name": "空行与边界", "args": [["", "0", "100"]], "expected": {"scores": [0, 100], "invalid": 0}, "visible": True},
+            {"name": "超出范围", "args": [["-1", "101", "50"]], "expected": {"scores": [50], "invalid": 2}, "visible": False},
+            {"name": "小数分数", "args": [["59.5", "60.5"]], "expected": {"scores": [59.5, 60.5], "invalid": 0}, "visible": False},
+        ],
     }
 }
 
@@ -43,6 +52,7 @@ SAFE_BUILTINS = {
     "str": str,
     "sum": sum,
     "tuple": tuple,
+    "ValueError": ValueError,
 }
 
 ALLOWED_ATTRIBUTES = {"append", "count", "get", "items", "keys", "lower", "split", "strip", "values"}
@@ -57,7 +67,6 @@ BANNED_NODES = (
     ast.Lambda,
     ast.Nonlocal,
     ast.Raise,
-    ast.Try,
     ast.With,
     ast.Yield,
     ast.YieldFrom,
@@ -138,16 +147,29 @@ def validate_result(challenge_id, actual):
         )
         return valid, "返回值必须是“字符串 → 非负整数”的小型字典"
 
+    if challenge_id == "score-analysis":
+        valid = (
+            isinstance(actual, dict)
+            and set(actual) == {"total", "average", "passed"}
+            and isinstance(actual["total"], (int, float))
+            and not isinstance(actual["total"], bool)
+            and isinstance(actual["average"], (int, float))
+            and not isinstance(actual["average"], bool)
+            and isinstance(actual["passed"], bool)
+        )
+        return valid, "返回值必须包含 total、average、passed，且类型正确"
+
     valid = (
         isinstance(actual, dict)
-        and set(actual) == {"total", "average", "passed"}
-        and isinstance(actual["total"], (int, float))
-        and not isinstance(actual["total"], bool)
-        and isinstance(actual["average"], (int, float))
-        and not isinstance(actual["average"], bool)
-        and isinstance(actual["passed"], bool)
+        and set(actual) == {"scores", "invalid"}
+        and isinstance(actual["scores"], list)
+        and len(actual["scores"]) <= 100
+        and all(isinstance(value, (int, float)) and not isinstance(value, bool) and 0 <= value <= 100 for value in actual["scores"])
+        and isinstance(actual["invalid"], int)
+        and not isinstance(actual["invalid"], bool)
+        and actual["invalid"] >= 0
     )
-    return valid, "返回值必须包含 total、average、passed，且类型正确"
+    return valid, "返回值必须包含 scores 列表和 invalid 非负整数"
 
 
 def evaluate(payload):

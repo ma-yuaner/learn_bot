@@ -38,7 +38,7 @@ export const tracks = [
     title: "算法迷宫",
     source: "算法与数据结构",
     description: "学习数据如何组织、算法如何衡量，并能解释每一步复杂度。",
-    chapters: ["复杂度", "数组与链表", "栈与队列", "哈希表", "树与堆", "图", "排序与查找", "递归与动态规划"]
+    chapters: ["复杂度与增长率", "数组", "单向与双向链表", "栈", "队列与双端队列", "哈希表", "二叉树", "二叉搜索树", "堆与优先队列", "图", "排序", "二分查找", "递归", "回溯", "动态规划", "工程选型与面试"]
   },
   {
     id: "database",
@@ -758,7 +758,109 @@ export const sixthLesson = {
   }
 };
 
-export const pythonLessons = [firstLesson, secondLesson, thirdLesson, fourthLesson, fifthLesson, sixthLesson];
+export const seventhLesson = {
+  id: "python-files-errors",
+  trackId: "python",
+  title: "07 · 文件、异常与数据持久化",
+  duration: "80–100 分钟",
+  objectives: [
+    "区分内存数据与持久化文件，并正确选择文本编码",
+    "使用 with 管理文件资源，理解打开、读取、关闭的生命周期",
+    "区分可预期异常与程序缺陷，进行最小范围捕获",
+    "把文件内容拆成读取、解析、验证和汇总四个可测试步骤"
+  ],
+  concepts: [
+    {
+      term: "持久化",
+      detail: "变量通常在程序结束后消失，文件把数据写入持久存储。文件内容只是字节，需要通过编码解释为文本。"
+    },
+    {
+      term: "上下文管理",
+      detail: "with open(...) as file 会在代码块结束时关闭文件，即使中途发生异常，也能可靠释放资源。"
+    },
+    {
+      term: "异常",
+      detail: "异常是程序无法按正常路径继续的信号。捕获异常前先识别可能失败的具体操作，不要用空 except 隐藏所有问题。"
+    },
+    {
+      term: "分层处理",
+      detail: "读取负责获得原始文本，解析负责转换格式，验证负责检查规则，汇总负责生成结果。分层后每一步都能单独测试。"
+    }
+  ],
+  types: [
+    ["open", "打开资源", `open(path, "r", encoding="utf-8")`, "明确模式和编码"],
+    ["with", "管理生命周期", `with open(...) as file:`, "退出代码块自动关闭"],
+    ["try", "尝试风险操作", `try: score = float(text)`, "范围越小，根因越清晰"],
+    ["except", "处理特定异常", `except ValueError:`, "不要使用空 except 吞掉缺陷"]
+  ],
+  referenceTitle: "持久化处理的四层流水线",
+  referenceDescription: "读取、解析、验证、汇总分开设计，错误才能被准确定位。",
+  prediction: {
+    code: `values = ["80", "bad", "60"]\nvalid = []\nfor text in values:\n    try:\n        valid.append(int(text))\n    except ValueError:\n        continue\nprint(sum(valid), len(valid))`,
+    choices: ["140 2", "140 3", "ValueError"],
+    answer: "140 2",
+    explanation: "\"80\" 和 \"60\" 成功转换并进入列表；\"bad\" 触发 ValueError 后执行 continue，因此汇总为 140，共 2 个有效值。"
+  },
+  quiz: [
+    {
+      question: "为什么推荐使用 with open(...)？",
+      options: ["让文件自动变成字典", "无论正常结束还是异常都能可靠关闭文件", "只有 with 才能读取文本"],
+      answer: 1,
+      reason: "上下文管理器负责资源生命周期，离开代码块时自动关闭文件。"
+    },
+    {
+      question: "读取 UTF-8 文本时，为什么应明确 encoding？",
+      options: ["避免依赖不同系统的默认编码", "让文件体积自动减半", "编码只影响数字"],
+      answer: 0,
+      reason: "不同系统默认编码可能不同，明确 UTF-8 能提高可移植性并减少乱码。"
+    },
+    {
+      question: "哪种异常捕获更合理？",
+      options: ["用 except: 包住整个程序", "只围绕 float(text) 捕获 ValueError", "忽略所有异常继续运行"],
+      answer: 1,
+      reason: "捕获范围和异常类型越具体，越不容易隐藏真正的程序缺陷。"
+    },
+    {
+      question: "为什么把读取与解析拆成两个函数？",
+      options: ["可以脱离真实文件单独测试解析逻辑", "Python 强制必须拆分", "拆分后不需要处理异常"],
+      answer: 0,
+      reason: "解析函数接收文本或文本行后可以直接测试，不必每次创建真实文件。"
+    }
+  ],
+  lab: {
+    kind: "files",
+    title: "文本解析实验室",
+    subtitle: "模拟文件内容，逐行解析并记录有效值与异常"
+  },
+  debugChallenge: {
+    code: `score_text = "优秀"\nscore = float(score_text)\nprint("解析完成")`,
+    question: "怎样修复才能保留错误证据并继续处理？",
+    choices: ["删除 float()，假装它是分数", "捕获 ValueError 并记录这行无效", "使用空 except 且什么都不做"],
+    answer: 1,
+    error: `ValueError: could not convert string to float: '优秀'`,
+    fix: `try:\n    score = float(score_text)\nexcept ValueError:\n    invalid_reason = f"无法解析分数：{score_text}"`,
+    result: `程序不会崩溃，并留下 invalid_reason = "无法解析分数：优秀"`,
+    explanation: "\"优秀\" 不符合浮点数字格式，float() 明确抛出 ValueError。正确做法是捕获这个具体异常并记录无效原因，而不是删除转换或吞掉错误。"
+  },
+  explanationChallenge: "为什么 except: pass 会让程序看似稳定却更难维护？怎样决定捕获范围和异常类型？",
+  explanationHint: "建议提到：隐藏缺陷、具体操作、具体异常、记录证据、继续或终止……",
+  evaluationGroups: [
+    ["隐藏", "吞掉"],
+    ["缺陷", "根因"],
+    ["范围", "具体操作"],
+    ["异常类型", "ValueError"],
+    ["记录", "证据"]
+  ],
+  codeChallenge: {
+    id: "parse-score-lines",
+    title: "真实代码验收 · 分数文本解析器",
+    brief: "实现 parse_score_lines(lines)，忽略空行，把 0–100 的数字加入 scores；无法转换或超出范围的行计入 invalid。返回 {\"scores\": [...], \"invalid\": 数量}。",
+    starter: `def parse_score_lines(lines):\n    scores = []\n    invalid = 0\n    # 逐行清理、转换、验证\n    return {\"scores\": scores, \"invalid\": invalid}`,
+    checks: ["数字与非法文本混合", "空行与边界值", "超出范围（隐藏）", "小数分数（隐藏）"]
+  }
+};
+
+export const pythonLessons = [firstLesson, secondLesson, thirdLesson, fourthLesson, fifthLesson, sixthLesson, seventhLesson];
 
 export const assessmentLevels = [
   {

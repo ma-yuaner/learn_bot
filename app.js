@@ -243,6 +243,15 @@ function renderWorkbench(kind) {
     return;
   }
 
+  if (kind === "files") {
+    controls.innerHTML = `
+      <label>模拟 scores.txt 内容<textarea id="file-lines-input" rows="7">80\nbad\n\n60\n101</textarea></label>
+      <label class="toggle-label"><input id="ignore-blank-input" type="checkbox" checked /> 忽略空行</label>
+      <button class="primary-button" id="run-workbench">读取并解析 <span>▶</span></button>
+    `;
+    return;
+  }
+
   if (kind === "functions") {
     controls.innerHTML = `
       <label>函数实参 scores（逗号分隔）<input id="function-scores-input" value="70,80,50" /></label>
@@ -475,6 +484,34 @@ function runWorkbench() {
     trace = `${rows.join("")}
       <div class="trace-row"><span>不变量</span><b>${round} × ${cost} + ${energy} = ${initialEnergy}</b></div>
       <div class="trace-row"><span>终止证明</span><b>energy 每轮减少且有下界 0</b></div>
+    `;
+  } else if (lesson.lab.kind === "files") {
+    const lines = document.querySelector("#file-lines-input").value.split(/\r?\n/);
+    const ignoreBlank = document.querySelector("#ignore-blank-input").checked;
+    const scores = [];
+    const errors = [];
+    const rows = [];
+    lines.forEach((line, index) => {
+      const text = line.trim();
+      if (!text && ignoreBlank) {
+        rows.push(`<div class="trace-row"><span>第 ${index + 1} 行</span><b>空行 → 忽略</b></div>`);
+        return;
+      }
+      const value = Number(text);
+      if (!text || !Number.isFinite(value)) {
+        errors.push({ line: index + 1, text, reason: "无法转换为数字" });
+        rows.push(`<div class="trace-row"><span>第 ${index + 1} 行</span><b>${escapeHtml(text || "(空)")} → ValueError</b></div>`);
+      } else if (value < 0 || value > 100) {
+        errors.push({ line: index + 1, text, reason: "超出 0–100" });
+        rows.push(`<div class="trace-row"><span>第 ${index + 1} 行</span><b>${value} → 范围无效</b></div>`);
+      } else {
+        scores.push(value);
+        rows.push(`<div class="trace-row"><span>第 ${index + 1} 行</span><b>${value} → scores.append</b></div>`);
+      }
+    });
+    output = `有效分数：${JSON.stringify(scores)}\n无效行数：${errors.length}\n错误证据：${JSON.stringify(errors)}`;
+    trace = `${rows.join("")}
+      <div class="trace-row"><span>流水线</span><b>读取 ${lines.length} → 解析 → 验证 → 汇总</b></div>
     `;
   } else if (lesson.lab.kind === "collections") {
     const raw = document.querySelector("#items-input").value;
