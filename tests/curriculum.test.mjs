@@ -33,7 +33,7 @@ test("考核覆盖知识点到面试的完整层级", () => {
 });
 
 test("每个 Python 关卡都符合可复用课程协议", () => {
-  assert.equal(pythonLessons.length, 5);
+  assert.equal(pythonLessons.length, 6);
   const ids = new Set();
   for (const lesson of pythonLessons) {
     assert.ok(!ids.has(lesson.id), `关卡 ID 重复：${lesson.id}`);

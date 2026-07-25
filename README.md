@@ -27,6 +27,7 @@ npm test
 - Python 第三关：条件判断与程序分支
 - Python 第四关：循环、状态与终止条件
 - Python 第五关：字符串、列表与字典
+- Python 第六关：函数、参数与返回值
 - 数据驱动的多关卡引擎与每关独立进度
 - 输出预测实验
 - 变量状态工作台
@@ -40,7 +41,7 @@ npm test
 - 全知识面覆盖矩阵与统一完成标准
 - GitHub Actions 持续集成
 
-详细设计见 [docs/learning-design.md](docs/learning-design.md)，开发覆盖情况见 [docs/coverage-matrix.md](docs/coverage-matrix.md)，平台能力规划见 [docs/product-roadmap.md](docs/product-roadmap.md)。
+详细设计见 [docs/learning-design.md](docs/learning-design.md)，开发覆盖情况见 [docs/coverage-matrix.md](docs/coverage-matrix.md)，平台能力规划见 [docs/product-roadmap.md](docs/product-roadmap.md)，手机与同步学习路线见 [docs/mobile-sync-architecture.md](docs/mobile-sync-architecture.md)。
 
 ## 内容原则
 

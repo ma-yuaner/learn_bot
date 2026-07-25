@@ -249,4 +249,9 @@ button { cursor: pointer; }
   .type-row span:last-child { grid-column: 2 / -1; }
   .table-title { display: block; }
   .content { padding-left: 17px; padding-right: 17px; }
+  button, .primary-button, .secondary-button { min-height: 44px; }
+  input, select, textarea { font-size: 16px; }
+  .code-editor-panel textarea { min-height: 230px; font-size: 14px; }
+  .lesson-switcher { overflow-x: auto; padding-bottom: 5px; }
+  .lesson-switcher button { flex: 0 0 auto; }
 }

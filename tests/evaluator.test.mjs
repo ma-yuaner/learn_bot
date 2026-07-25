@@ -46,3 +46,16 @@ test("受限执行器拒绝导入与危险属性", () => {
   assert.equal(reflected.category, "safety");
   assert.match(reflected.message, /__class__/);
 });
+
+test("成绩分析挑战检查返回值、空列表和通过边界", () => {
+  const result = evaluate(`
+def analyze_scores(scores):
+    if not scores:
+        return {"total": 0, "average": 0, "passed": False}
+    total = sum(scores)
+    average = total / len(scores)
+    return {"total": total, "average": average, "passed": average >= 60}
+  `.trim(), "score-analysis");
+  assert.equal(result.ok, true);
+  assert.ok(result.results.every((item) => item.passed));
+});

@@ -14,6 +14,15 @@ CHALLENGES = {
             {"name": "单个物品", "args": [["map"]], "expected": {"map": 1}, "visible": False},
             {"name": "连续重复", "args": [["rope", "rope", "rope"]], "expected": {"rope": 3}, "visible": False},
         ],
+    },
+    "score-analysis": {
+        "function": "analyze_scores",
+        "tests": [
+            {"name": "普通分数", "args": [[70, 80]], "expected": {"total": 150, "average": 75, "passed": True}, "visible": True},
+            {"name": "空列表", "args": [[]], "expected": {"total": 0, "average": 0, "passed": False}, "visible": True},
+            {"name": "通过边界", "args": [[60]], "expected": {"total": 60, "average": 60, "passed": True}, "visible": False},
+            {"name": "小数平均值", "args": [[59, 60]], "expected": {"total": 119, "average": 59.5, "passed": False}, "visible": False},
+        ],
     }
 }
 
@@ -113,6 +122,34 @@ def fail(message, category="validation"):
     return {"ok": False, "category": category, "message": message}
 
 
+def validate_result(challenge_id, actual):
+    if challenge_id == "inventory-summary":
+        valid = (
+            isinstance(actual, dict)
+            and len(actual) <= 100
+            and all(
+                isinstance(key, str)
+                and len(key) <= 100
+                and isinstance(value, int)
+                and not isinstance(value, bool)
+                and value >= 0
+                for key, value in actual.items()
+            )
+        )
+        return valid, "返回值必须是“字符串 → 非负整数”的小型字典"
+
+    valid = (
+        isinstance(actual, dict)
+        and set(actual) == {"total", "average", "passed"}
+        and isinstance(actual["total"], (int, float))
+        and not isinstance(actual["total"], bool)
+        and isinstance(actual["average"], (int, float))
+        and not isinstance(actual["average"], bool)
+        and isinstance(actual["passed"], bool)
+    )
+    return valid, "返回值必须包含 total、average、passed，且类型正确"
+
+
 def evaluate(payload):
     challenge = CHALLENGES.get(payload.get("challengeId"))
     if not challenge:
@@ -142,23 +179,12 @@ def evaluate(payload):
         results = []
         for case in challenge["tests"]:
             actual = learner_function(*case["args"])
-            valid_result = (
-                isinstance(actual, dict)
-                and len(actual) <= 100
-                and all(
-                    isinstance(key, str)
-                    and len(key) <= 100
-                    and isinstance(value, int)
-                    and not isinstance(value, bool)
-                    and value >= 0
-                    for key, value in actual.items()
-                )
-            )
+            valid_result, contract_error = validate_result(payload["challengeId"], actual)
             passed = valid_result and actual == case["expected"]
             results.append({
                 "name": case["name"] if case["visible"] else "隐藏测试",
                 "passed": passed,
-                "actual": actual if case["visible"] and valid_result else ("返回值必须是“字符串 → 非负整数”的小型字典" if case["visible"] else None),
+                "actual": actual if case["visible"] and valid_result else (contract_error if case["visible"] else None),
                 "expected": case["expected"] if case["visible"] else None,
             })
         return {

@@ -110,7 +110,7 @@ export const tracks = [
     title: "服务接口站",
     source: "AI 工程补充路线",
     description: "理解 HTTP、REST、后端服务、身份认证和数据库如何组成可调用的 AI 产品。",
-    chapters: ["网络与 HTTP", "REST API", "FastAPI", "参数与校验", "数据库访问", "认证与权限", "异步任务", "接口测试"]
+    chapters: ["网络与 HTTP", "REST API", "FastAPI", "参数与校验", "数据库访问", "认证与权限", "移动端 API", "进度同步与冲突", "异步任务", "接口测试"]
   },
   {
     id: "deployment",
@@ -118,7 +118,7 @@ export const tracks = [
     title: "部署云港",
     source: "AI 工程补充路线",
     description: "把本地程序封装、配置、发布并稳定运行在服务器和云环境。",
-    chapters: ["Docker", "镜像与容器", "Compose", "环境变量", "反向代理", "CI/CD", "云部署", "监控与回滚"]
+    chapters: ["Docker", "镜像与容器", "Compose", "环境变量", "响应式 Web", "PWA 与离线缓存", "反向代理", "CI/CD", "云部署", "监控与回滚"]
   },
   {
     id: "security",
@@ -656,7 +656,109 @@ export const fifthLesson = {
   }
 };
 
-export const pythonLessons = [firstLesson, secondLesson, thirdLesson, fourthLesson, fifthLesson];
+export const sixthLesson = {
+  id: "python-functions",
+  trackId: "python",
+  title: "06 · 函数、参数与返回值",
+  duration: "70–90 分钟",
+  objectives: [
+    "说明函数如何把一段规则封装成可复用接口",
+    "区分形参、实参、返回值和局部变量",
+    "使用单一职责拆分过长流程，并为函数设计边界",
+    "识别遗漏 return、参数顺序和可变默认值等常见问题"
+  ],
+  concepts: [
+    {
+      term: "函数接口",
+      detail: "函数名、参数和返回值共同构成接口。调用者只需要知道输入要求和输出保证，不应依赖函数内部临时变量。"
+    },
+    {
+      term: "参数",
+      detail: "定义函数时写的是形参，调用时传入的是实参。参数让同一规则可以处理不同数据，而不是依赖写死的全局值。"
+    },
+    {
+      term: "返回值",
+      detail: "return 把结果交还给调用者并结束本次函数调用。没有显式 return 的函数会返回 None，不等于返回内部最后计算的值。"
+    },
+    {
+      term: "作用域",
+      detail: "函数内部创建的局部变量通常只在本次调用中有效。局部状态减少意外影响，让函数更容易测试和复用。"
+    }
+  ],
+  types: [
+    ["def", "定义函数", `def add(a, b):`, "只定义，不会自动执行函数体"],
+    ["参数", "接收输入", `add(2, 3)`, "2 和 3 是本次调用的实参"],
+    ["return", "交还结果", `return a + b`, "返回后本次调用立即结束"],
+    ["None", "没有结果值", `result is None`, "遗漏 return 时常见"]
+  ],
+  referenceTitle: "函数的四段契约",
+  referenceDescription: "明确名称、输入、处理规则和输出，函数才真正可复用、可测试。",
+  prediction: {
+    code: `def consume(energy, cost=3):\n    remaining = energy - cost\n    return remaining\n\nenergy = 10\nenergy = consume(energy)\nprint(energy)`,
+    choices: ["10", "7", "None"],
+    answer: "7",
+    explanation: "调用 consume(10) 时，默认 cost 为 3，局部变量 remaining 得到 7；return 把 7 交回，外部 energy 再更新为 7。"
+  },
+  quiz: [
+    {
+      question: "函数体计算出 result，但没有写 return，调用结果是什么？",
+      options: ["result 的值", "None", "一定语法错误"],
+      answer: 1,
+      reason: "Python 函数没有显式 return 时会返回 None，内部变量不会自动成为返回值。"
+    },
+    {
+      question: "定义 def add(a, b): 时，a 和 b 是什么？",
+      options: ["实参", "形参", "返回值"],
+      answer: 1,
+      reason: "函数定义中的名字是形参；调用 add(2, 3) 时的 2、3 才是实参。"
+    },
+    {
+      question: "哪种函数职责更清晰？",
+      options: ["一个函数读取文件、训练模型、发邮件并部署", "一个函数只负责计算一组分数的平均值", "函数越长越容易复用"],
+      answer: 1,
+      reason: "单一职责让输入输出明确，也更容易单独测试、修改和组合。"
+    },
+    {
+      question: "局部变量的主要价值是什么？",
+      options: ["让所有代码都能随意修改它", "限制状态影响范围，降低意外耦合", "让变量永久保存"],
+      answer: 1,
+      reason: "局部变量把临时状态限制在函数调用内部，使行为更容易推理和测试。"
+    }
+  ],
+  lab: {
+    kind: "functions",
+    title: "函数调用追踪器",
+    subtitle: "观察实参进入、局部计算和返回值离开的全过程"
+  },
+  debugChallenge: {
+    code: `def add_energy(current, supply):\n    result = current + supply\n\nenergy = add_energy(10, 5)\nprint(energy + 1)`,
+    question: "为什么最后一行会报错？",
+    choices: ["函数不能做加法", "函数遗漏 return，因此 energy 是 None", "参数必须写成字符串"],
+    answer: 1,
+    error: `TypeError: unsupported operand type(s) for +: 'NoneType' and 'int'`,
+    fix: `def add_energy(current, supply):\n    result = current + supply\n    return result`,
+    result: `add_energy(10, 5) → 15；energy + 1 → 16`,
+    explanation: "函数内部虽然计算出 result，但没有 return。Python 自动返回 None，外部 energy 因此得到 None；None 与整数 1 不能相加。"
+  },
+  explanationChallenge: "为什么函数内部算出了 result，调用者仍然拿不到它？请讲清局部变量、return、None 和调用边界。",
+  explanationHint: "建议提到：局部作用域、显式 return、调用结果、None……",
+  evaluationGroups: [
+    ["局部", "作用域"],
+    ["return", "返回"],
+    ["调用", "交给"],
+    ["None"],
+    ["边界", "接口"]
+  ],
+  codeChallenge: {
+    id: "score-analysis",
+    title: "真实代码验收 · 成绩分析函数",
+    brief: "实现 analyze_scores(scores)，返回包含 total、average、passed 的字典。空列表时 total 和 average 为 0，passed 为 False；平均分达到 60 才通过。",
+    starter: `def analyze_scores(scores):\n    # 返回 {\"total\": ..., \"average\": ..., \"passed\": ...}\n    pass`,
+    checks: ["普通分数列表", "空列表边界", "刚好 60 分（隐藏）", "小数平均值（隐藏）"]
+  }
+};
+
+export const pythonLessons = [firstLesson, secondLesson, thirdLesson, fourthLesson, fifthLesson, sixthLesson];
 
 export const assessmentLevels = [
   {

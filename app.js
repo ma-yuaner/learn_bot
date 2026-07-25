@@ -243,6 +243,16 @@ function renderWorkbench(kind) {
     return;
   }
 
+  if (kind === "functions") {
+    controls.innerHTML = `
+      <label>函数实参 scores（逗号分隔）<input id="function-scores-input" value="70,80,50" /></label>
+      <label>及格线 pass_line<input id="pass-line-input" type="number" value="60" min="0" max="100" /></label>
+      <label class="toggle-label"><input id="round-average-input" type="checkbox" /> 平均值保留 1 位小数</label>
+      <button class="primary-button" id="run-workbench">调用函数 <span>▶</span></button>
+    `;
+    return;
+  }
+
   controls.innerHTML = `
     <label>物品文本（逗号分隔）<input id="items-input" value="torch,map,torch,rope" /></label>
     <label>查找目标 target<input id="target-input" value="torch" maxlength="20" /></label>
@@ -466,7 +476,7 @@ function runWorkbench() {
       <div class="trace-row"><span>不变量</span><b>${round} × ${cost} + ${energy} = ${initialEnergy}</b></div>
       <div class="trace-row"><span>终止证明</span><b>energy 每轮减少且有下界 0</b></div>
     `;
-  } else {
+  } else if (lesson.lab.kind === "collections") {
     const raw = document.querySelector("#items-input").value;
     const target = document.querySelector("#target-input").value.trim();
     const clean = document.querySelector("#clean-input").checked;
@@ -481,6 +491,24 @@ function runWorkbench() {
       <div class="trace-row"><span>split 结果</span><b>list · ${escapeHtml(JSON.stringify(items))}</b></div>
       <div class="trace-row"><span>汇总结果</span><b>dict · ${escapeHtml(JSON.stringify(counts))}</b></div>
       <div class="trace-row"><span>按键查找</span><b>counts.get("${escapeHtml(target)}", 0) → ${targetCount}</b></div>
+    `;
+  } else {
+    const raw = document.querySelector("#function-scores-input").value;
+    const scores = raw.split(",")
+      .map((item) => Number(item.trim()))
+      .filter((item) => Number.isFinite(item));
+    const passLine = Number(document.querySelector("#pass-line-input").value) || 0;
+    const shouldRound = document.querySelector("#round-average-input").checked;
+    const total = scores.reduce((sum, score) => sum + score, 0);
+    const rawAverage = scores.length ? total / scores.length : 0;
+    const average = shouldRound ? Math.round(rawAverage * 10) / 10 : rawAverage;
+    const passed = scores.length > 0 && average >= passLine;
+    output = `返回值：${JSON.stringify({ total, average, passed })}`;
+    trace = `
+      <div class="trace-row"><span>实参进入</span><b>scores = ${escapeHtml(JSON.stringify(scores))}</b></div>
+      <div class="trace-row"><span>局部计算</span><b>total = ${total}；average = ${average}</b></div>
+      <div class="trace-row"><span>条件判断</span><b>${average} >= ${passLine} → ${passed}</b></div>
+      <div class="trace-row"><span>return</span><b>字典离开函数，局部变量结束</b></div>
     `;
   }
 
