@@ -21,7 +21,7 @@ npm test
 
 ## 当前版本
 
-- 21 个学习区域：11 个培训基础区域与 10 个现代 AI 工程补充区域
+- 22 个学习区域：11 个培训基础区域与 11 个现代 AI/架构工程补充区域
 - Python 第一关：程序、值与变量
 - Python 第二关：运算符、表达式与类型转换
 - Python 第三关：条件判断与程序分支
@@ -29,6 +29,7 @@ npm test
 - Python 第五关：字符串、列表与字典
 - Python 第六关：函数、参数与返回值
 - Python 第七关：文件、异常与数据持久化
+- Python 08–13：面向对象、模块与包、高级语法、并发与 GIL、网络与正则、工程化毕业考核
 - 数据驱动的多关卡引擎与每关独立进度
 - 输出预测实验
 - 变量状态工作台
@@ -36,6 +37,7 @@ npm test
 - 首个 L2 模块项目：资源探险模拟器
 - 本地受限 Python 代码验收原型（AST 检查、资源限制、公开与隐藏测试）
 - 学习档案与幂等同步 SQLite 数据模型原型
+- Python 平原 13 个关卡完整开放及 L3 区域毕业要求
 - 三题即时测验
 - 费曼解释挑战
 - 本地学习进度和四维掌握度
@@ -43,7 +45,7 @@ npm test
 - 全知识面覆盖矩阵与统一完成标准
 - GitHub Actions 持续集成
 
-详细设计见 [docs/learning-design.md](docs/learning-design.md)，开发覆盖情况见 [docs/coverage-matrix.md](docs/coverage-matrix.md)，平台能力规划见 [docs/product-roadmap.md](docs/product-roadmap.md)，手机与同步学习路线见 [docs/mobile-sync-architecture.md](docs/mobile-sync-architecture.md)，数据结构专项见 [docs/data-structures-roadmap.md](docs/data-structures-roadmap.md)。
+详细设计见 [docs/learning-design.md](docs/learning-design.md)，开发覆盖情况见 [docs/coverage-matrix.md](docs/coverage-matrix.md)，平台能力规划见 [docs/product-roadmap.md](docs/product-roadmap.md)，手机与同步学习路线见 [docs/mobile-sync-architecture.md](docs/mobile-sync-architecture.md)，数据结构专项见 [docs/data-structures-roadmap.md](docs/data-structures-roadmap.md)，架构与全局工具选择见 [docs/architecture-decisions-roadmap.md](docs/architecture-decisions-roadmap.md)。
 
 ## 内容原则
 

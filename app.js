@@ -161,6 +161,7 @@ function renderLesson() {
   document.querySelector("#concept-checkpoint-label").textContent = "我能用自己的话讲清本关四个核心概念及它们之间的关系。";
   renderModuleProject(lesson);
   renderCodeChallenge(lesson);
+  renderGraduation(lesson);
 
   bindLessonInteractions();
   renderLessonSwitcher();
@@ -191,6 +192,16 @@ function renderCodeChallenge(lesson) {
   document.querySelector("#learner-code").value = lesson.codeChallenge.starter;
   document.querySelector("#runner-status").textContent = "等待提交";
   document.querySelector("#code-results").innerHTML = "";
+}
+
+function renderGraduation(lesson) {
+  const section = document.querySelector("#graduation-section");
+  section.hidden = !lesson.graduation;
+  if (!lesson.graduation) return;
+  document.querySelector("#graduation-title").textContent = lesson.graduation.title;
+  document.querySelector("#graduation-requirements").innerHTML = lesson.graduation.requirements
+    .map((item) => `<li>${item}</li>`)
+    .join("");
 }
 
 function renderWorkbench(kind) {
@@ -258,6 +269,66 @@ function renderWorkbench(kind) {
       <label>及格线 pass_line<input id="pass-line-input" type="number" value="60" min="0" max="100" /></label>
       <label class="toggle-label"><input id="round-average-input" type="checkbox" /> 平均值保留 1 位小数</label>
       <button class="primary-button" id="run-workbench">调用函数 <span>▶</span></button>
+    `;
+    return;
+  }
+
+  if (kind === "oop") {
+    controls.innerHTML = `
+      <label>实例 A 初始能量<input id="oop-energy-a" type="number" value="80" min="0" max="100" /></label>
+      <label>实例 B 初始能量<input id="oop-energy-b" type="number" value="50" min="0" max="100" /></label>
+      <label>A 承受伤害<input id="oop-damage" type="number" value="20" min="0" max="100" /></label>
+      <button class="primary-button" id="run-workbench">调用实例方法 <span>▶</span></button>
+    `;
+    return;
+  }
+
+  if (kind === "modules") {
+    controls.innerHTML = `
+      <label>本地文件名<input id="module-file-input" value="random.py" /></label>
+      <label>运行方式<select id="module-mode-input"><option value="import">被其他模块 import</option><option value="direct">直接运行</option></select></label>
+      <label class="toggle-label"><input id="module-repeat-input" type="checkbox" checked /> 在同一进程导入两次</label>
+      <button class="primary-button" id="run-workbench">追踪导入 <span>▶</span></button>
+    `;
+    return;
+  }
+
+  if (kind === "advanced") {
+    controls.innerHTML = `
+      <label>内部列表初始值<input id="copy-values-input" value="1,2" /></label>
+      <label>向浅拷贝内部追加<input id="copy-append-input" type="number" value="9" /></label>
+      <label>消费生成器数量<input id="generator-count-input" type="number" value="3" min="1" max="10" /></label>
+      <button class="primary-button" id="run-workbench">观察引用与惰性 <span>▶</span></button>
+    `;
+    return;
+  }
+
+  if (kind === "concurrency") {
+    controls.innerHTML = `
+      <label>任务性质<select id="workload-input"><option value="io">IO 密集：等待网络</option><option value="cpu">CPU 密集：大量计算</option></select></label>
+      <label>任务数量<input id="task-count-input" type="number" value="100" min="1" max="1000" /></label>
+      <label class="toggle-label"><input id="shared-state-input" type="checkbox" /> 多任务修改共享状态</label>
+      <button class="primary-button" id="run-workbench">选择并发模型 <span>▶</span></button>
+    `;
+    return;
+  }
+
+  if (kind === "network") {
+    controls.innerHTML = `
+      <label>请求 URL<input id="url-input" value="https://api.example.com/items?q=map" /></label>
+      <label>响应状态码<input id="status-input" type="number" value="200" min="100" max="599" /></label>
+      <label>待匹配文本<input id="regex-text-input" value="item-42 and item-7" /></label>
+      <button class="primary-button" id="run-workbench">分析请求与模式 <span>▶</span></button>
+    `;
+    return;
+  }
+
+  if (kind === "architecture") {
+    controls.innerHTML = `
+      <label>当前改动<select id="change-input"><option value="rule">修改业务计算规则</option><option value="db">替换数据库</option><option value="cli">增加 Web 入口</option></select></label>
+      <label class="toggle-label"><input id="tests-input" type="checkbox" checked /> 已有业务单元测试</label>
+      <label class="toggle-label"><input id="injection-input" type="checkbox" checked /> 外部依赖通过接口注入</label>
+      <button class="primary-button" id="run-workbench">分析影响范围 <span>▶</span></button>
     `;
     return;
   }
@@ -529,7 +600,7 @@ function runWorkbench() {
       <div class="trace-row"><span>汇总结果</span><b>dict · ${escapeHtml(JSON.stringify(counts))}</b></div>
       <div class="trace-row"><span>按键查找</span><b>counts.get("${escapeHtml(target)}", 0) → ${targetCount}</b></div>
     `;
-  } else {
+  } else if (lesson.lab.kind === "functions") {
     const raw = document.querySelector("#function-scores-input").value;
     const scores = raw.split(",")
       .map((item) => Number(item.trim()))
@@ -546,6 +617,81 @@ function runWorkbench() {
       <div class="trace-row"><span>局部计算</span><b>total = ${total}；average = ${average}</b></div>
       <div class="trace-row"><span>条件判断</span><b>${average} >= ${passLine} → ${passed}</b></div>
       <div class="trace-row"><span>return</span><b>字典离开函数，局部变量结束</b></div>
+    `;
+  } else if (lesson.lab.kind === "oop") {
+    const energyA = Math.max(0, Number(document.querySelector("#oop-energy-a").value) || 0);
+    const energyB = Math.max(0, Number(document.querySelector("#oop-energy-b").value) || 0);
+    const damage = Math.max(0, Number(document.querySelector("#oop-damage").value) || 0);
+    const afterA = Math.max(0, energyA - damage);
+    output = `Explorer A.energy = ${afterA}\nExplorer B.energy = ${energyB}\n类属性 team = "AI"（两者共享）`;
+    trace = `
+      <div class="trace-row"><span>创建 A</span><b>__init__(${energyA}) → self.energy = ${energyA}</b></div>
+      <div class="trace-row"><span>创建 B</span><b>__init__(${energyB}) → self.energy = ${energyB}</b></div>
+      <div class="trace-row"><span>A.take_damage</span><b>${energyA} - ${damage} → ${afterA}</b></div>
+      <div class="trace-row"><span>隔离证据</span><b>B.energy 仍为 ${energyB}</b></div>
+    `;
+  } else if (lesson.lab.kind === "modules") {
+    const filename = document.querySelector("#module-file-input").value.trim();
+    const mode = document.querySelector("#module-mode-input").value;
+    const repeat = document.querySelector("#module-repeat-input").checked;
+    const shadows = ["random.py", "json.py", "typing.py", "socket.py"].includes(filename.toLowerCase());
+    output = `模块名：${filename.replace(/\.py$/i, "")}\n__name__：${mode === "direct" ? "__main__" : filename.replace(/\.py$/i, "")}\n${shadows ? "警告：可能遮蔽标准库同名模块" : "名称未命中常见标准库冲突"}\n顶层执行次数：${repeat ? 1 : 1}`;
+    trace = `
+      <div class="trace-row"><span>首次加载</span><b>查找路径 → 执行顶层 → 写入 sys.modules</b></div>
+      <div class="trace-row"><span>再次导入</span><b>${repeat ? "命中缓存，不重复执行" : "未进行第二次导入"}</b></div>
+      <div class="trace-row"><span>入口保护</span><b>${mode === "direct" ? "执行 main 入口" : "跳过 main 入口"}</b></div>
+      <div class="trace-row"><span>命名风险</span><b>${shadows ? "高：请重命名本地文件" : "未发现常见冲突"}</b></div>
+    `;
+  } else if (lesson.lab.kind === "advanced") {
+    const values = document.querySelector("#copy-values-input").value.split(",").map((item) => Number(item.trim())).filter(Number.isFinite);
+    const appended = Number(document.querySelector("#copy-append-input").value) || 0;
+    const consumed = Math.max(1, Math.floor(Number(document.querySelector("#generator-count-input").value) || 1));
+    const sharedInner = [...values, appended];
+    const generated = Array.from({ length: consumed }, (_, index) => index * index);
+    output = `浅拷贝后原对象内部：${JSON.stringify(sharedInner)}\n生成器本次消费：${JSON.stringify(generated)}\n下一位置：${consumed}`;
+    trace = `
+      <div class="trace-row"><span>浅拷贝</span><b>新外层容器，内部列表引用仍共享</b></div>
+      <div class="trace-row"><span>内部追加</span><b>${appended} 对两边都可见</b></div>
+      <div class="trace-row"><span>生成器</span><b>逐项产生 ${consumed} 个值，不预建无限序列</b></div>
+      <div class="trace-row"><span>状态保存</span><b>yield 后暂停在索引 ${consumed}</b></div>
+    `;
+  } else if (lesson.lab.kind === "concurrency") {
+    const workload = document.querySelector("#workload-input").value;
+    const taskCount = Math.max(1, Number(document.querySelector("#task-count-input").value) || 1);
+    const shared = document.querySelector("#shared-state-input").checked;
+    const model = workload === "cpu" ? "多进程 multiprocessing" : taskCount > 30 ? "asyncio 协程" : "线程池或 asyncio";
+    output = `推荐模型：${model}\n任务数量：${taskCount}\n同步策略：${shared ? "锁或单一消费者队列" : "不可变结果汇总"}`;
+    trace = `
+      <div class="trace-row"><span>任务性质</span><b>${workload === "cpu" ? "CPU 密集" : "IO 密集"}</b></div>
+      <div class="trace-row"><span>GIL 影响</span><b>${workload === "cpu" ? "纯 Python 多线程难以多核并行" : "等待 IO 时可切换其他任务"}</b></div>
+      <div class="trace-row"><span>共享状态</span><b>${shared ? "存在竞态风险，需要明确所有权" : "无共享写入，协调更简单"}</b></div>
+      <div class="trace-row"><span>结论</span><b>${model}</b></div>
+    `;
+  } else if (lesson.lab.kind === "network") {
+    const urlText = document.querySelector("#url-input").value.trim();
+    const status = Number(document.querySelector("#status-input").value) || 0;
+    const text = document.querySelector("#regex-text-input").value;
+    let parsed;
+    try { parsed = new URL(urlText); } catch { parsed = null; }
+    const matches = [...text.matchAll(/item-(\d+)/g)].map((match) => Number(match[1]));
+    output = `URL：${parsed ? "有效" : "无效"}\nHTTP：${status >= 200 && status < 300 ? "协议成功" : "需要错误处理"}\n正则匹配 ID：${JSON.stringify(matches)}`;
+    trace = `
+      <div class="trace-row"><span>连接目标</span><b>${parsed ? `${parsed.hostname}:${parsed.port || 443}` : "无法解析"}</b></div>
+      <div class="trace-row"><span>请求路径</span><b>${parsed ? parsed.pathname + parsed.search : "无"}</b></div>
+      <div class="trace-row"><span>响应状态</span><b>${status} → ${status >= 200 && status < 300 ? "继续验证正文" : "进入协议错误分支"}</b></div>
+      <div class="trace-row"><span>模式结果</span><b>r"item-(\\d+)" → ${matches.length} 项</b></div>
+    `;
+  } else {
+    const change = document.querySelector("#change-input").value;
+    const tested = document.querySelector("#tests-input").checked;
+    const injected = document.querySelector("#injection-input").checked;
+    const target = { rule: "领域/业务服务", db: "仓储适配器", cli: "新增入口适配器" }[change];
+    output = `主要修改边界：${target}\n业务回归保护：${tested ? "已有" : "缺失"}\n外部依赖可替换：${injected ? "是" : "否"}`;
+    trace = `
+      <div class="trace-row"><span>变化原因</span><b>${target}</b></div>
+      <div class="trace-row"><span>依赖方向</span><b>${injected ? "入口/适配器依赖业务接口" : "业务直接耦合外部实现，需重构"}</b></div>
+      <div class="trace-row"><span>测试证据</span><b>${tested ? "先运行单元测试，再补适配器集成测试" : "先建立当前行为测试，避免盲改"}</b></div>
+      <div class="trace-row"><span>影响控制</span><b>只让一个边界因该原因变化</b></div>
     `;
   }
 

@@ -195,6 +195,8 @@ button { cursor: pointer; }
 .editor-actions button:disabled { opacity: .55; cursor: wait; }
 #code-results { display: grid; gap: 7px; padding: 0 20px 20px; }
 .runner-error { padding: 13px; color: #ffd7cd; background: #46261f; border-left: 3px solid var(--coral); font-size: 12px; line-height: 1.6; }
+.graduation-panel { margin-top: 10px; }
+.graduation-note { margin: 15px 0 0; padding: 15px 20px; border-left: 3px solid var(--coral); background: rgba(227,109,77,.1); color: var(--muted); font-size: 12px; line-height: 1.7; }
 
 .path-intro { max-width: 720px; color: var(--muted); line-height: 1.8; margin: -10px 0 26px 60px; }
 .assessment-levels { display: grid; grid-template-columns: repeat(5, 1fr); border: 1px solid var(--line); }

@@ -1,3 +1,5 @@
+import { advancedPythonLessons } from "./python-advanced.js";
+
 export const tracks = [
   {
     id: "environment",
@@ -29,7 +31,7 @@ export const tracks = [
     title: "Python 平原",
     source: "Python",
     description: "从值和变量开始，逐步建立程序执行、数据建模与模块化思维。",
-    chapters: ["程序、值与变量", "运算符与表达式", "分支", "循环", "字符串", "容器", "函数", "文件与异常", "面向对象", "模块与包"],
+    chapters: ["程序、值与变量", "运算符与表达式", "分支", "循环", "字符串与容器", "函数", "文件与异常", "面向对象", "模块、包与环境", "高级语法与迭代", "并发与 GIL", "网络、HTTP 与正则", "工程化与毕业考核"],
     available: true
   },
   {
@@ -103,6 +105,14 @@ export const tracks = [
     source: "AI 工程补充路线",
     description: "学习项目结构、测试、日志、配置、调试、依赖管理与代码质量。",
     chapters: ["项目结构", "依赖与环境", "单元测试", "集成测试", "调试", "日志与配置", "重构与评审"]
+  },
+  {
+    id: "architecture-decisions",
+    icon: "ADR",
+    title: "架构决策峰",
+    source: "工程架构补充路线",
+    description: "根据公司阶段、团队、流量、风险、预算和运维成熟度选择架构与工具，并规划演进触发点。",
+    chapters: ["约束与质量属性", "单体与模块化单体", "微服务", "事件驱动", "Serverless", "数据与存储选型", "缓存与消息", "容器与编排", "可观测性", "架构演进与 ADR", "全局工具选择", "宏观情景考核"]
   },
   {
     id: "web-api",
@@ -867,7 +877,16 @@ export const seventhLesson = {
   }
 };
 
-export const pythonLessons = [firstLesson, secondLesson, thirdLesson, fourthLesson, fifthLesson, sixthLesson, seventhLesson];
+export const pythonLessons = [
+  firstLesson,
+  secondLesson,
+  thirdLesson,
+  fourthLesson,
+  fifthLesson,
+  sixthLesson,
+  seventhLesson,
+  ...advancedPythonLessons
+];
 
 export const assessmentLevels = [
   {
