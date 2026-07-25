@@ -1,4 +1,5 @@
 import { assessmentLevels, pythonLessons, tracks } from "./data/curriculum.js";
+import { simulateExpedition } from "./lib/expedition.js";
 
 const storageKey = "ai-explorer-progress-v2";
 const legacyStorageKey = "ai-explorer-progress-v1";
@@ -8,7 +9,8 @@ const blankLessonProgress = () => ({
   workshop: false,
   debug: false,
   quiz: 0,
-  explanation: 0
+  explanation: 0,
+  project: false
 });
 
 let state = loadState();
@@ -16,7 +18,12 @@ let state = loadState();
 function loadState() {
   try {
     const stored = JSON.parse(localStorage.getItem(storageKey));
-    if (stored?.lessons) return stored;
+    if (stored?.lessons) {
+      for (const lesson of pythonLessons) {
+        stored.lessons[lesson.id] = { ...blankLessonProgress(), ...stored.lessons[lesson.id] };
+      }
+      return stored;
+    }
   } catch {
     // 损坏的本地数据不应阻止课程启动。
   }
@@ -91,7 +98,8 @@ function renderStaticContent() {
 function renderLessonSwitcher() {
   document.querySelector("#lesson-switcher").innerHTML = pythonLessons.map((lesson, index) => {
     const progress = state.lessons[lesson.id] || blankLessonProgress();
-    const passed = progress.quiz >= 80 && progress.explanation >= 60 && progress.debug;
+    const lessonPassed = progress.quiz >= 80 && progress.explanation >= 60 && progress.debug;
+    const passed = lesson.moduleProject ? lessonPassed && progress.project : lessonPassed;
     return `
       <button class="${lesson.id === state.activeLessonId ? "active" : ""}" data-lesson="${lesson.id}">
         <span>${String(index + 1).padStart(2, "0")}</span>${passed ? "已通过" : "学习"}
@@ -148,10 +156,23 @@ function renderLesson() {
   document.querySelector("#explanation-input").value = "";
   document.querySelector("#explanation-feedback").className = "feedback";
   document.querySelector("#concept-checkpoint-label").textContent = "我能用自己的话讲清本关四个核心概念及它们之间的关系。";
+  renderModuleProject(lesson);
 
   bindLessonInteractions();
   renderLessonSwitcher();
   renderProgress();
+}
+
+function renderModuleProject(lesson) {
+  const section = document.querySelector("#module-project");
+  section.hidden = !lesson.moduleProject;
+  if (!lesson.moduleProject) return;
+  document.querySelector("#project-title").textContent = lesson.moduleProject.title;
+  document.querySelector("#project-brief").textContent = lesson.moduleProject.brief;
+  document.querySelector("#project-requirements").innerHTML = lesson.moduleProject.requirements
+    .map((item) => `<li>${item}</li>`)
+    .join("");
+  document.querySelector("#project-test-results").innerHTML = "";
 }
 
 function renderWorkbench(kind) {
@@ -178,17 +199,27 @@ function renderWorkbench(kind) {
     return;
   }
 
+  if (kind === "conditions") {
+    controls.innerHTML = `
+      <label>当前能量 energy<input id="branch-energy-input" type="number" value="60" min="0" max="100" /></label>
+      <label>天气 weather
+        <select id="weather-input">
+          <option value="sunny">晴天 sunny</option>
+          <option value="rain" selected>下雨 rain</option>
+          <option value="storm">暴风 storm</option>
+        </select>
+      </label>
+      <label class="toggle-label"><input id="map-input" type="checkbox" checked /> 已携带地图 has_map</label>
+      <button class="primary-button" id="run-workbench">判断行动路径 <span>▶</span></button>
+    `;
+    return;
+  }
+
   controls.innerHTML = `
-    <label>当前能量 energy<input id="branch-energy-input" type="number" value="60" min="0" max="100" /></label>
-    <label>天气 weather
-      <select id="weather-input">
-        <option value="sunny">晴天 sunny</option>
-        <option value="rain" selected>下雨 rain</option>
-        <option value="storm">暴风 storm</option>
-      </select>
-    </label>
-    <label class="toggle-label"><input id="map-input" type="checkbox" checked /> 已携带地图 has_map</label>
-    <button class="primary-button" id="run-workbench">判断行动路径 <span>▶</span></button>
+    <label>初始能量 energy<input id="loop-energy-input" type="number" value="14" min="0" max="100" /></label>
+    <label>每轮消耗 cost<input id="loop-cost-input" type="number" value="3" min="1" max="20" /></label>
+    <label>最多轮数 limit<input id="loop-limit-input" type="number" value="10" min="1" max="30" /></label>
+    <button class="primary-button" id="run-workbench">追踪循环 <span>▶</span></button>
   `;
 }
 
@@ -206,13 +237,16 @@ function renderProgress() {
   const progress = currentProgress();
   const dimensions = masteryScores(progress);
   const total = Math.round(Object.values(dimensions).reduce((sum, value) => sum + value, 0) / Object.keys(dimensions).length);
-  const completed = [
+  const checkpointStates = [
     progress.concept,
     progress.prediction,
     progress.workshop,
     progress.debug,
     progress.quiz >= 80 && progress.explanation >= 60
-  ].filter(Boolean).length;
+  ];
+  if (currentLesson().moduleProject) checkpointStates.push(progress.project);
+  const completed = checkpointStates.filter(Boolean).length;
+  const checkpointTotal = checkpointStates.length;
   const allScores = pythonLessons.map((lesson) => {
     const item = state.lessons[lesson.id] || blankLessonProgress();
     return Object.values(masteryScores(item)).reduce((sum, value) => sum + value, 0) / 5;
@@ -223,8 +257,8 @@ function renderProgress() {
   document.querySelector("#mastery-bars").innerHTML = Object.entries(dimensions).map(([label, score]) => `
     <div class="mastery-row"><span>${label}</span><div class="mastery-track"><i style="width:${score}%"></i></div><b>${score}</b></div>
   `).join("");
-  document.querySelector("#mission-progress").style.width = `${completed * 20}%`;
-  document.querySelector("#mission-status").textContent = `${completed} / 5 个检查点`;
+  document.querySelector("#mission-progress").style.width = `${(completed / checkpointTotal) * 100}%`;
+  document.querySelector("#mission-status").textContent = `${completed} / ${checkpointTotal} 个检查点`;
   document.querySelector("#level-progress").style.width = `${Math.min(100, xp / 8)}%`;
   document.querySelector("#xp-label").textContent = `${xp} XP`;
   document.querySelector("#level-number").textContent = String(Math.max(1, Math.ceil(xp / 250))).padStart(2, "0");
@@ -317,6 +351,8 @@ function bindLessonInteractions() {
   };
 
   document.querySelector("#evaluate-explanation").onclick = evaluateExplanation;
+  const projectButton = document.querySelector("#run-project-tests");
+  if (lesson.moduleProject) projectButton.onclick = runProjectTests;
 }
 
 function runWorkbench() {
@@ -350,7 +386,7 @@ function runWorkbench() {
       <div class="trace-row"><span>比较表达式</span><b>${total} >= 50 → ${freeShipping}</b></div>
       <div class="trace-row"><span>结果类型</span><b>number, number, bool</b></div>
     `;
-  } else {
+  } else if (lesson.lab.kind === "conditions") {
     const energy = Math.max(0, Math.min(100, Number(document.querySelector("#branch-energy-input").value) || 0));
     const weather = document.querySelector("#weather-input").value;
     const hasMap = document.querySelector("#map-input").checked;
@@ -372,6 +408,25 @@ function runWorkbench() {
       <div class="trace-row"><span>命中分支</span><b>${path} → ${action}</b></div>
       <div class="trace-row"><span>路径规则</span><b>命中后不再检查后续分支</b></div>
     `;
+  } else {
+    const initialEnergy = Math.max(0, Number(document.querySelector("#loop-energy-input").value) || 0);
+    const cost = Math.max(1, Number(document.querySelector("#loop-cost-input").value) || 1);
+    const limit = Math.max(1, Math.floor(Number(document.querySelector("#loop-limit-input").value) || 1));
+    let energy = initialEnergy;
+    let round = 0;
+    const rows = [];
+    while (energy >= cost && round < limit) {
+      const before = energy;
+      round += 1;
+      energy -= cost;
+      rows.push(`<div class="trace-row"><span>第 ${round} 轮</span><b>${before} - ${cost} = ${energy}</b></div>`);
+    }
+    const reason = round >= limit && energy >= cost ? "达到安全轮数上限" : "剩余能量不足";
+    output = `完成轮数：${round}\n剩余能量：${energy}\n终止原因：${reason}`;
+    trace = `${rows.join("")}
+      <div class="trace-row"><span>不变量</span><b>${round} × ${cost} + ${energy} = ${initialEnergy}</b></div>
+      <div class="trace-row"><span>终止证明</span><b>energy 每轮减少且有下界 0</b></div>
+    `;
   }
 
   document.querySelector("#terminal-output").textContent = output;
@@ -379,6 +434,34 @@ function runWorkbench() {
   currentProgress().workshop = true;
   saveState();
   toast("实操检查点完成");
+}
+
+function runProjectTests() {
+  const cases = [
+    { name: "正常路径", input: [14, 3, "sunny"], expected: { rounds: 4, energy: 2 } },
+    { name: "边界路径", input: [9, 3, "sunny"], expected: { rounds: 3, energy: 0 } },
+    { name: "异常路径", input: [10, 0, "sunny"], expectedError: true },
+    { name: "暴风加耗", input: [15, 3, "storm"], expected: { rounds: 3, energy: 0 } }
+  ];
+  const results = cases.map((item) => {
+    const result = simulateExpedition(...item.input);
+    const passed = item.expectedError
+      ? !result.ok
+      : result.ok && result.rounds === item.expected.rounds && result.energy === item.expected.energy;
+    return { ...item, result, passed };
+  });
+  const allPassed = results.every((item) => item.passed);
+  document.querySelector("#project-test-results").innerHTML = results.map((item) => `
+    <div class="project-test ${item.passed ? "passed" : "failed"}">
+      <span>${item.passed ? "✓" : "×"}</span>
+      <div><b>${item.name}</b><small>${item.result.ok ? `${item.result.rounds} 轮，剩余 ${item.result.energy}` : item.result.reason}</small></div>
+    </div>
+  `).join("");
+  if (allPassed) {
+    currentProgress().project = true;
+    saveState();
+    toast("L2 模块项目验收通过");
+  }
 }
 
 function evaluateExplanation() {

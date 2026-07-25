@@ -56,7 +56,7 @@
             <div class="lesson-switcher" id="lesson-switcher" aria-label="Python 关卡"></div>
             <div class="mission-progress"><i id="mission-progress"></i></div>
             <div class="mission-meta">
-              <span id="mission-status">0 / 4 个检查点</span>
+              <span id="mission-status">0 / 5 个检查点</span>
               <button class="primary-button" data-scroll="concepts">开始关卡 <span>→</span></button>
             </div>
           </article>
@@ -161,6 +161,26 @@
               <textarea id="explanation-input" rows="8"></textarea>
               <button class="secondary-button" id="evaluate-explanation">评估我的解释</button>
               <div id="explanation-feedback" class="feedback" aria-live="polite"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="lesson-section module-project" id="module-project" hidden>
+          <div class="section-heading">
+            <span class="step-number">L2</span>
+            <div><p class="eyebrow">模块项目</p><h2 id="project-title"></h2></div>
+          </div>
+          <div class="project-shell">
+            <div class="project-brief">
+              <p id="project-brief"></p>
+              <h3>验收条件</h3>
+              <ul id="project-requirements"></ul>
+            </div>
+            <div class="project-test-panel">
+              <div class="window-bar"><span></span><span></span><span></span><b>module acceptance</b></div>
+              <p>先预测三个场景，再运行自动验收，观察正常路径、边界路径和异常路径。</p>
+              <button class="primary-button" id="run-project-tests">运行项目验收 <span>▶</span></button>
+              <div id="project-test-results"></div>
             </div>
           </div>
         </section>

@@ -442,7 +442,111 @@ export const thirdLesson = {
   ]
 };
 
-export const pythonLessons = [firstLesson, secondLesson, thirdLesson];
+export const fourthLesson = {
+  id: "python-loops",
+  trackId: "python",
+  title: "04 · 循环、状态与终止条件",
+  duration: "60–80 分钟",
+  objectives: [
+    "区分 for 遍历与 while 条件循环的适用场景",
+    "逐轮追踪循环变量、累计值和剩余资源",
+    "说明循环终止条件为何最终会变为 False",
+    "识别死循环、边界遗漏和错误的状态更新"
+  ],
+  concepts: [
+    {
+      term: "重复规则",
+      detail: "循环不是复制粘贴代码，而是描述“对一组数据逐个处理”或“条件成立时重复处理”的规则。"
+    },
+    {
+      term: "循环状态",
+      detail: "每一轮开始前，变量构成当前状态；循环体读取状态、执行操作，再产生下一轮状态。调试时应把每轮状态列成表。"
+    },
+    {
+      term: "终止条件",
+      detail: "while 循环必须有机会让条件变为 False。需要指出哪个变量在变化、变化方向是什么，以及它何时跨过边界。"
+    },
+    {
+      term: "循环不变量",
+      detail: "循环不变量是在每轮前后都保持为真的事实，例如“已消耗能量 + 剩余能量 = 初始能量”，它能帮助证明逻辑正确。"
+    }
+  ],
+  types: [
+    ["for", "遍历序列", "for item in items:", "次数通常由数据数量决定"],
+    ["range", "整数序列", "range(1, 4)", "包含 1，不包含 4"],
+    ["while", "条件重复", "while energy >= cost:", "必须证明条件最终为 False"],
+    ["控制", "break / continue", "提前结束 / 跳过本轮", "优先写清正常终止逻辑"]
+  ],
+  referenceTitle: "循环的四个观察角度",
+  referenceDescription: "每次都写出初始状态、执行动作、新状态和终止判断。",
+  prediction: {
+    code: `energy = 10\nfor step in range(1, 4):\n    energy = energy - step\n    print(step, energy)`,
+    choices: ["1 9 / 2 7 / 3 4", "1 9 / 2 8 / 3 7", "1 10 / 2 9 / 3 7"],
+    answer: "1 9 / 2 7 / 3 4",
+    explanation: "range(1, 4) 依次产生 1、2、3。energy 会保留上一轮结果：10-1=9，9-2=7，7-3=4。"
+  },
+  quiz: [
+    {
+      question: "range(2, 6) 会产生哪些整数？",
+      options: ["2、3、4、5", "2、3、4、5、6", "3、4、5、6"],
+      answer: 0,
+      reason: "range 的结束值不包含在序列中，所以从 2 到 5。"
+    },
+    {
+      question: "什么时候更适合使用 while？",
+      options: ["明确遍历一个列表", "重复到某个动态条件不再成立", "任何循环都必须使用 while"],
+      answer: 1,
+      reason: "while 适用于次数事先不明确、由运行状态决定是否继续的情况。"
+    },
+    {
+      question: "while energy > 0 中，循环体没有改变 energy，主要风险是什么？",
+      options: ["语法错误", "循环可能永远不结束", "energy 自动变成字符串"],
+      answer: 1,
+      reason: "如果 energy 初始大于 0 且永不变化，条件始终为 True，会形成死循环。"
+    },
+    {
+      question: "初始能量 12，每轮消耗 3，循环条件 energy >= 3，会执行几轮？",
+      options: ["3", "4", "5"],
+      answer: 1,
+      reason: "状态依次为 12、9、6、3，四次执行后变为 0，下一次检查条件为 False。"
+    }
+  ],
+  lab: {
+    kind: "loops",
+    title: "循环追踪器",
+    subtitle: "逐轮观察资源消耗，并证明循环一定会停止"
+  },
+  debugChallenge: {
+    code: `energy = 3\nwhile energy > 0:\n    print(energy)\n    energy - 1`,
+    question: "为什么这个循环不会停止？",
+    choices: ["print 会恢复 energy", "energy - 1 只计算但没有更新变量", "while 不能使用大于号"],
+    answer: 1,
+    fix: `energy = energy - 1`,
+    explanation: "energy - 1 是一个表达式，它得到新值但没有保存。energy 始终是 3，条件永远为 True。需要赋值更新状态。"
+  },
+  explanationChallenge: "如何证明 while energy >= cost 的循环一定会停止？请说明前提、状态变化、边界和异常输入。",
+  explanationHint: "建议提到：cost > 0、每轮递减、下界、最终小于 cost……",
+  evaluationGroups: [
+    ["cost > 0", "正数"],
+    ["每轮", "递减", "减少"],
+    ["下界", "不能无限"],
+    ["小于", "条件为 False", "终止"],
+    ["异常", "验证", "零"]
+  ],
+  moduleProject: {
+    title: "L2 模块项目 · 资源探险模拟器",
+    brief: "把变量、表达式、分支和循环组合起来：探险家每轮消耗资源，遇到危险天气时增加消耗，资源不足时安全停止。",
+    requirements: [
+      "每轮开始前判断资源是否足够",
+      "更新轮数、剩余能量和行动记录",
+      "暴风天气每轮额外消耗 2 点",
+      "输入消耗必须大于 0，避免死循环",
+      "输出终止原因，并通过正常、边界、异常三类测试"
+    ]
+  }
+};
+
+export const pythonLessons = [firstLesson, secondLesson, thirdLesson, fourthLesson];
 
 export const assessmentLevels = [
   {

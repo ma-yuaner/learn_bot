@@ -165,6 +165,22 @@ button { cursor: pointer; }
 .explain-card textarea { width: 100%; padding: 15px; resize: vertical; border: 1px solid var(--line); background: #fffef9; line-height: 1.7; margin: 12px 0; }
 .explain-card code { color: var(--coral); }
 
+.project-shell { display: grid; grid-template-columns: 1fr 1fr; background: var(--card); border: 1px solid var(--line); box-shadow: var(--shadow); }
+.project-brief { padding: 30px; }
+.project-brief > p { color: var(--muted); line-height: 1.8; }
+.project-brief h3 { margin-top: 27px; font: 21px Georgia, "Songti SC", serif; }
+.project-brief ul { padding-left: 20px; color: var(--muted); font-size: 13px; line-height: 1.8; }
+.project-test-panel { margin: 16px; padding: 0 22px 22px; background: #111914; color: white; }
+.project-test-panel .window-bar { margin: 0 -22px 20px; }
+.project-test-panel > p { color: #9da9a1; font-size: 12px; line-height: 1.7; }
+#project-test-results { display: grid; gap: 7px; margin-top: 18px; }
+.project-test { display: flex; align-items: center; gap: 11px; padding: 11px; background: #1b251f; border-left: 3px solid var(--muted); }
+.project-test.passed { border-color: #65bc76; }
+.project-test.failed { border-color: var(--coral); }
+.project-test > span { font-size: 18px; }
+.project-test b, .project-test small { display: block; }
+.project-test small { color: #94a198; margin-top: 3px; }
+
 .path-intro { max-width: 720px; color: var(--muted); line-height: 1.8; margin: -10px 0 26px 60px; }
 .assessment-levels { display: grid; grid-template-columns: repeat(5, 1fr); border: 1px solid var(--line); }
 .assessment-level { padding: 24px 18px; background: rgba(255,255,255,.42); border-right: 1px solid var(--line); min-height: 235px; }
@@ -206,7 +222,7 @@ button { cursor: pointer; }
   .hero { min-height: auto; padding: 55px 0; }
   .hero h1 { font-size: 48px; }
   .compass { display: none; }
-  .dashboard-grid, .lab-grid, .assessment-grid, .workbench { grid-template-columns: 1fr; }
+  .dashboard-grid, .lab-grid, .assessment-grid, .workbench, .project-shell { grid-template-columns: 1fr; }
   .objective-panel { grid-template-columns: 1fr; }
   .objective-panel ul { grid-template-columns: 1fr; }
   .concept-grid, .world-map { grid-template-columns: 1fr; }
