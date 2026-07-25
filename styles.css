@@ -1,0 +1,197 @@
+:root {
+  --ink: #18211c;
+  --paper: #f2f0e7;
+  --card: rgba(255, 255, 250, 0.76);
+  --line: rgba(24, 33, 28, 0.14);
+  --green: #285b48;
+  --green-soft: #dce9d7;
+  --coral: #e36d4d;
+  --gold: #d0a34a;
+  --muted: #6c756f;
+  --shadow: 0 22px 70px rgba(48, 54, 43, 0.12);
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  color: var(--ink);
+  background:
+    linear-gradient(rgba(24, 33, 28, .035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(24, 33, 28, .035) 1px, transparent 1px),
+    var(--paper);
+  background-size: 32px 32px;
+  font-family: Inter, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+}
+button, input, textarea { font: inherit; }
+button { cursor: pointer; }
+
+.ambient { position: fixed; border-radius: 50%; filter: blur(1px); z-index: -1; opacity: .55; }
+.ambient-one { width: 420px; height: 420px; right: -160px; top: 70px; background: radial-gradient(circle, #e9c87f, transparent 68%); }
+.ambient-two { width: 500px; height: 500px; left: 20%; bottom: -300px; background: radial-gradient(circle, #b9d2be, transparent 70%); }
+
+.topbar {
+  height: 78px; padding: 0 3vw; display: flex; align-items: center; gap: 34px;
+  border-bottom: 1px solid var(--line); background: rgba(242, 240, 231, .86);
+  backdrop-filter: blur(16px); position: sticky; top: 0; z-index: 20;
+}
+.brand { display: flex; align-items: center; gap: 12px; color: inherit; text-decoration: none; min-width: 245px; }
+.brand-mark { width: 42px; height: 42px; display: grid; place-items: center; background: var(--ink); color: white; font-family: Georgia, serif; font-size: 19px; transform: rotate(-3deg); }
+.brand-mark span { color: #f0c66e; }
+.brand strong { font-size: 17px; letter-spacing: .08em; }
+.brand small { display: block; color: var(--muted); font-size: 9px; letter-spacing: .18em; margin-top: 3px; }
+.level { display: flex; align-items: center; gap: 12px; flex: 1; color: var(--muted); font-size: 12px; }
+.level b { color: var(--ink); font-family: Georgia, serif; font-size: 20px; margin-left: 4px; }
+.level-bar { width: min(260px, 24vw); height: 5px; background: #d8d8cc; overflow: hidden; }
+.level-bar i, .mission-progress i { height: 100%; display: block; width: 0; background: var(--coral); transition: width .35s ease; }
+.ghost-button { border: 1px solid var(--line); background: transparent; padding: 9px 13px; color: var(--muted); }
+
+.layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); max-width: 1500px; margin: auto; }
+.sidebar { position: sticky; top: 78px; height: calc(100vh - 78px); padding: 34px 22px; border-right: 1px solid var(--line); overflow: auto; }
+.eyebrow { color: var(--green); font-weight: 800; font-size: 10px; letter-spacing: .2em; text-transform: uppercase; }
+#track-list { display: grid; gap: 4px; margin-top: 18px; }
+.track-link {
+  display: flex; align-items: center; gap: 12px; padding: 11px; color: var(--muted);
+  border: 0; background: transparent; text-align: left; width: 100%; border-radius: 3px;
+}
+.track-link:hover { background: rgba(255,255,255,.5); color: var(--ink); }
+.track-link.active { background: var(--green); color: white; }
+.track-icon { width: 30px; height: 30px; border: 1px solid currentColor; display: grid; place-items: center; font-family: ui-monospace, monospace; font-size: 11px; }
+.track-link small { display: block; opacity: .66; margin-top: 2px; }
+.source-note { margin-top: 35px; padding: 14px; border: 1px dashed var(--line); font-size: 11px; color: var(--muted); line-height: 1.65; }
+.source-note span { color: var(--ink); font-weight: 700; }
+
+.content { padding: 58px clamp(28px, 5vw, 82px) 100px; min-width: 0; }
+.hero { min-height: 330px; display: flex; justify-content: space-between; align-items: center; gap: 30px; }
+.hero h1 { font-family: Georgia, "Songti SC", serif; font-size: clamp(48px, 6vw, 86px); line-height: .98; letter-spacing: -.045em; margin: 18px 0 25px; font-weight: 500; }
+.hero h1 em { color: var(--coral); font-weight: 400; }
+.hero-copy { max-width: 640px; color: var(--muted); line-height: 1.85; }
+.compass { width: 155px; height: 155px; border: 1px solid var(--line); border-radius: 50%; display: grid; place-items: center; position: relative; color: var(--green); flex: 0 0 auto; }
+.compass::before, .compass::after { content: ""; position: absolute; background: var(--line); }
+.compass::before { width: 1px; height: 125%; }
+.compass::after { width: 125%; height: 1px; }
+.compass span { position: absolute; top: 9px; font: 11px Georgia, serif; }
+.compass i { width: 40px; height: 70px; background: linear-gradient(155deg, var(--coral) 50%, var(--green) 50%); clip-path: polygon(50% 0, 100% 100%, 50% 78%, 0 100%); transform: rotate(24deg); z-index: 2; }
+.compass b { position: absolute; font-size: 13px; bottom: 10px; }
+
+.dashboard-grid { display: grid; grid-template-columns: 1.55fr .8fr; gap: 18px; }
+.card { background: var(--card); border: 1px solid rgba(255,255,255,.8); box-shadow: var(--shadow); padding: 28px; backdrop-filter: blur(15px); }
+.card-head { display: flex; justify-content: space-between; color: var(--muted); font-size: 11px; }
+.tag { display: inline-block; color: var(--green); background: var(--green-soft); padding: 5px 8px; font-size: 10px; font-weight: 800; letter-spacing: .1em; }
+.tag.coral { color: #8d3925; background: #f9d9cf; }
+.card h2 { font: 34px Georgia, "Songti SC", serif; margin: 24px 0 12px; }
+.card > p { color: var(--muted); line-height: 1.7; }
+.mission-progress { height: 7px; background: #dddcd2; margin: 28px 0 12px; }
+.mission-meta { display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-size: 12px; }
+.primary-button, .secondary-button { border: 0; padding: 12px 17px; font-weight: 700; }
+.primary-button { color: white; background: var(--green); }
+.primary-button:hover { background: #1c4938; }
+.primary-button span { margin-left: 18px; }
+.secondary-button { border: 1px solid var(--green); color: var(--green); background: transparent; }
+.mastery-score { display: flex; align-items: baseline; margin: 19px 0 18px; }
+.mastery-score strong { font: 56px Georgia, serif; }
+.mastery-score span { color: var(--muted); }
+.mastery-row { display: grid; grid-template-columns: 48px 1fr 25px; gap: 8px; align-items: center; font-size: 11px; margin: 10px 0; }
+.mastery-track { height: 5px; background: #dddcd2; }
+.mastery-track i { display: block; height: 100%; background: var(--gold); }
+
+.lesson-section, .map-section { padding-top: 115px; }
+.section-heading { display: flex; align-items: flex-start; gap: 17px; margin-bottom: 30px; }
+.section-heading .eyebrow { margin: 1px 0 7px; }
+.section-heading h2 { margin: 0; font: 38px Georgia, "Songti SC", serif; }
+.step-number { width: 42px; height: 42px; display: grid; place-items: center; border: 1px solid var(--ink); border-radius: 50%; font: 14px Georgia, serif; }
+.objective-panel { display: grid; grid-template-columns: 180px 1fr; padding: 24px; background: var(--ink); color: white; }
+.objective-panel h3 { color: #efc976; font: 20px Georgia, serif; }
+.objective-panel ul { display: grid; grid-template-columns: 1fr 1fr; gap: 11px 28px; margin: 0; padding-left: 20px; line-height: 1.55; color: #d8ddd9; font-size: 13px; }
+.concept-grid { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); border-top: 0; }
+.concept-card { padding: 25px 20px; border-right: 1px solid var(--line); }
+.concept-card:last-child { border: 0; }
+.concept-card b { font: 22px Georgia, "Songti SC", serif; color: var(--green); }
+.concept-card p { color: var(--muted); font-size: 13px; line-height: 1.75; }
+.type-table { margin-top: 24px; padding: 25px; background: rgba(255,255,255,.48); border: 1px solid var(--line); }
+.table-title { display: flex; justify-content: space-between; align-items: baseline; }
+.table-title h3 { margin: 0; font: 23px Georgia, serif; }
+.table-title p { color: var(--muted); font-size: 12px; }
+.type-row { display: grid; grid-template-columns: 80px 1fr 1fr 2fr; gap: 14px; padding: 13px 0; border-top: 1px solid var(--line); font-size: 13px; }
+.type-row code { color: var(--coral); font-weight: 700; }
+.checkpoint { display: flex; align-items: center; gap: 14px; padding: 18px 23px; background: var(--green-soft); margin-top: 15px; font-size: 13px; }
+.checkpoint input { width: 19px; height: 19px; accent-color: var(--green); }
+.checkpoint b { display: block; color: var(--green); margin-bottom: 3px; }
+
+.lab-grid, .assessment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.code-window { background: #17201b; color: #edf3ed; box-shadow: var(--shadow); min-height: 300px; }
+.window-bar { height: 44px; display: flex; align-items: center; gap: 6px; padding: 0 14px; border-bottom: 1px solid #354039; color: #9ca9a1; font-size: 11px; }
+.window-bar span { width: 9px; height: 9px; border-radius: 50%; background: #64736a; }
+.window-bar span:first-child { background: var(--coral); }
+.window-bar b { margin-left: auto; font-weight: 400; }
+.code-window pre { margin: 0; padding: 35px; font: 15px/2 ui-monospace, SFMono-Regular, Menlo, monospace; overflow: auto; }
+.challenge-panel, .quiz-card, .explain-card { padding: 28px; background: rgba(255,255,255,.62); border: 1px solid var(--line); }
+.challenge-panel h3, .quiz-card h3, .explain-card h3 { font: 25px Georgia, "Songti SC", serif; margin: 20px 0 7px; }
+.challenge-panel > p, .explain-card > p { color: var(--muted); line-height: 1.7; }
+.choice-list { display: grid; gap: 9px; margin-top: 22px; }
+.choice { padding: 13px 15px; border: 1px solid var(--line); background: white; text-align: left; }
+.choice:hover { border-color: var(--green); }
+.choice.correct { border-color: var(--green); background: var(--green-soft); }
+.choice.wrong { border-color: var(--coral); background: #f9ded6; }
+.feedback { display: none; margin-top: 15px; padding: 13px; background: #ebe9df; font-size: 12px; line-height: 1.65; }
+.feedback.show { display: block; }
+
+.workbench { display: grid; grid-template-columns: .8fr 1.2fr; background: var(--ink); color: white; }
+.controls { padding: 30px; display: grid; gap: 18px; }
+.controls label { display: grid; gap: 8px; color: #c9d0ca; font-size: 12px; }
+.controls input { padding: 12px; border: 1px solid #4a554e; background: #222d27; color: white; }
+.controls input[type="range"] { padding: 0; accent-color: var(--coral); }
+.controls output { color: #efc976; }
+.terminal { margin: 17px; padding: 20px; background: #0e1511; border: 1px solid #39433d; font-family: ui-monospace, monospace; }
+.terminal-title { color: #78867d; font-size: 10px; letter-spacing: .15em; }
+.terminal-title span { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #65bc76; margin-right: 7px; }
+.terminal pre { color: #efc976; font: 14px/1.7 ui-monospace, monospace; min-height: 70px; white-space: pre-wrap; }
+.trace-row { display: grid; grid-template-columns: 90px 1fr; border-top: 1px solid #273129; padding: 9px 0; font-size: 11px; color: #95a198; }
+.trace-row b { color: #d6ded8; }
+
+.quiz-card, .explain-card { min-width: 0; }
+.quiz-question { padding: 22px 0; border-bottom: 1px solid var(--line); }
+.quiz-question h3 { font: 16px/1.5 inherit; font-weight: 700; }
+.quiz-question label { display: block; margin: 9px 0; color: var(--muted); font-size: 13px; }
+.quiz-question input { accent-color: var(--green); margin-right: 8px; }
+.quiz-card .primary-button { margin-top: 20px; }
+.explain-card textarea { width: 100%; padding: 15px; resize: vertical; border: 1px solid var(--line); background: #fffef9; line-height: 1.7; margin: 12px 0; }
+.explain-card code { color: var(--coral); }
+
+.world-map { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.region { min-height: 185px; padding: 22px; border: 1px solid var(--line); background: rgba(255,255,255,.45); position: relative; overflow: hidden; }
+.region.available { background: var(--green); color: white; }
+.region-icon { font: 34px Georgia, serif; opacity: .35; position: absolute; right: 18px; top: 15px; }
+.region h3 { font: 22px Georgia, "Songti SC", serif; margin: 6px 0 9px; }
+.region p { color: var(--muted); font-size: 12px; line-height: 1.65; max-width: 85%; }
+.region.available p { color: #d4e0d8; }
+.region small { display: block; margin-top: 18px; opacity: .6; }
+.toast { position: fixed; bottom: 25px; right: 25px; padding: 13px 18px; background: var(--ink); color: white; transform: translateY(100px); opacity: 0; transition: .25s; z-index: 30; font-size: 12px; }
+.toast.show { transform: translateY(0); opacity: 1; }
+
+@media (max-width: 1000px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .content { padding-top: 30px; }
+  .concept-grid { grid-template-columns: 1fr 1fr; }
+  .concept-card:nth-child(2) { border-right: 0; }
+  .concept-card { border-bottom: 1px solid var(--line); }
+  .world-map { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 720px) {
+  .topbar { padding: 0 16px; }
+  .brand { min-width: 0; }
+  .brand > span:last-child, .level > span:first-child, .ghost-button { display: none; }
+  .hero { min-height: auto; padding: 55px 0; }
+  .hero h1 { font-size: 48px; }
+  .compass { display: none; }
+  .dashboard-grid, .lab-grid, .assessment-grid, .workbench { grid-template-columns: 1fr; }
+  .objective-panel { grid-template-columns: 1fr; }
+  .objective-panel ul { grid-template-columns: 1fr; }
+  .concept-grid, .world-map { grid-template-columns: 1fr; }
+  .concept-card { border-right: 0; }
+  .type-row { grid-template-columns: 55px 1fr 1fr; }
+  .type-row span:last-child { grid-column: 2 / -1; }
+  .table-title { display: block; }
+  .content { padding-left: 17px; padding-right: 17px; }
+}
