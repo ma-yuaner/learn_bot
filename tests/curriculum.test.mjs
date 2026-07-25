@@ -33,7 +33,7 @@ test("考核覆盖知识点到面试的完整层级", () => {
 });
 
 test("每个 Python 关卡都符合可复用课程协议", () => {
-  assert.equal(pythonLessons.length, 4);
+  assert.equal(pythonLessons.length, 5);
   const ids = new Set();
   for (const lesson of pythonLessons) {
     assert.ok(!ids.has(lesson.id), `关卡 ID 重复：${lesson.id}`);
@@ -44,11 +44,18 @@ test("每个 Python 关卡都符合可复用课程协议", () => {
     assert.ok(lesson.prediction.choices.includes(lesson.prediction.answer));
     assert.ok(lesson.lab.kind);
     assert.ok(lesson.debugChallenge.choices[lesson.debugChallenge.answer]);
+    assert.ok(lesson.debugChallenge.error);
+    assert.ok(lesson.debugChallenge.result);
     assert.ok(lesson.quiz.length >= 3);
     assert.ok(lesson.evaluationGroups.length >= 4);
     if (lesson.moduleProject) {
       assert.ok(lesson.moduleProject.title.startsWith("L2"));
       assert.ok(lesson.moduleProject.requirements.length >= 5);
+    }
+    if (lesson.codeChallenge) {
+      assert.ok(lesson.codeChallenge.id);
+      assert.match(lesson.codeChallenge.starter, /^def /);
+      assert.ok(lesson.codeChallenge.checks.length >= 3);
     }
   }
 });

@@ -243,7 +243,9 @@ export const firstLesson = {
     question: "这段代码为什么会报错？",
     choices: ["energy 没有定义", "字符串不能直接与整数相加", "print 不能输出变量"],
     answer: 1,
+    error: `TypeError: can only concatenate str (not "int") to str`,
     fix: `print("当前能量：" + str(energy))`,
+    result: `当前能量：80`,
     explanation: "加号两边分别是 str 和 int。Python 不会猜测你想做文本拼接还是数值相加，需要先用 str(energy) 显式转换，或者使用 f 字符串。"
   },
   explanationChallenge: "为什么 level = level + 1 在程序里成立，而在数学等式里看起来不成立？",
@@ -335,8 +337,10 @@ export const secondLesson = {
     question: "哪种修复既明确又能完成数值加法？",
     choices: ["next_year = age_text + \"1\"", "next_year = int(age_text) + 1", "next_year = str(1)"],
     answer: 1,
+    error: `TypeError: can only concatenate str (not "int") to str`,
     fix: `next_year = int(age_text) + 1`,
-    explanation: "字符串 \"18\" 代表文本。先用 int() 得到整数 18，再加 1 才是数值运算。拼接 \"1\" 会得到文本 \"181\"。"
+    result: `int("18") → 18；18 + 1 → 19；next_year = 19（int）`,
+    explanation: "字符串 \"18\" 代表文本。原代码让 str 与 int 使用加号，因此抛出 TypeError。int(age_text) 先得到整数 18，再加 1，最终明确得到整数 19；如果拼接 \"1\"，得到的会是字符串 \"181\"。"
   },
   explanationChallenge: "为什么从 input() 得到的“18”不能直接加 1？请讲清值、类型、运算意图和修复方式。",
   explanationHint: "建议提到：input、str、数值加法、int()、转换失败……",
@@ -428,7 +432,9 @@ export const thirdLesson = {
     question: "为什么 85 分只得到“及格”？",
     choices: ["elif 永远不能比较数字", "较宽的条件先命中，使优秀分支不可达", "score 应该写成字符串"],
     answer: 1,
+    error: `没有抛出异常，但逻辑结果错误：grade = "及格"`,
     fix: `if score >= 80:\n    grade = "优秀"\nelif score >= 60:\n    grade = "及格"`,
+    result: `grade = "优秀"`,
     explanation: "85 同时满足 >= 60 和 >= 80，但程序只执行第一个命中的分支。应先检查更严格、更窄的 >= 80，再检查 >= 60。"
   },
   explanationChallenge: "为什么 if score >= 60 写在 if score >= 80 前面会导致“优秀”分支不可达？如何系统检查这类问题？",
@@ -521,7 +527,9 @@ export const fourthLesson = {
     question: "为什么这个循环不会停止？",
     choices: ["print 会恢复 energy", "energy - 1 只计算但没有更新变量", "while 不能使用大于号"],
     answer: 1,
+    error: `没有抛出异常，但程序持续输出 3，无法终止`,
     fix: `energy = energy - 1`,
+    result: `依次输出 3、2、1，然后 energy = 0，循环结束`,
     explanation: "energy - 1 是一个表达式，它得到新值但没有保存。energy 始终是 3，条件永远为 True。需要赋值更新状态。"
   },
   explanationChallenge: "如何证明 while energy >= cost 的循环一定会停止？请说明前提、状态变化、边界和异常输入。",
@@ -546,7 +554,109 @@ export const fourthLesson = {
   }
 };
 
-export const pythonLessons = [firstLesson, secondLesson, thirdLesson, fourthLesson];
+export const fifthLesson = {
+  id: "python-collections",
+  trackId: "python",
+  title: "05 · 字符串、列表与字典",
+  duration: "70–90 分钟",
+  objectives: [
+    "根据数据关系选择字符串、列表或字典",
+    "正确使用索引、切片、追加、更新和成员判断",
+    "说明可变对象与不可变对象在修改时的差异",
+    "避免遍历列表时直接删除元素造成的跳项问题"
+  ],
+  concepts: [
+    {
+      term: "字符串",
+      detail: "字符串是按顺序排列的字符序列，支持索引、切片和遍历，但字符串本身不可变；所谓修改通常会创建新字符串。"
+    },
+    {
+      term: "列表",
+      detail: "列表保存有顺序的一组值，可以追加、删除和替换。索引从 0 开始，负索引从末尾开始。"
+    },
+    {
+      term: "字典",
+      detail: "字典使用唯一键查找对应值，适合表达“名称 → 属性”或“物品 → 数量”。查找通常比逐项扫描列表更直接。"
+    },
+    {
+      term: "可变性",
+      detail: "列表和字典可以原地改变，多个变量指向同一对象时会观察到同一变化；字符串、整数等不可变值不会原地修改。"
+    }
+  ],
+  types: [
+    ["str", "字符序列", `name[0] / name[:2]`, "有序、不可变"],
+    ["list", "有序集合", `items.append("map")`, "可变、允许重复"],
+    ["dict", "键值映射", `counts["map"] = 2`, "键唯一、按键访问"],
+    ["in", "成员判断", `"map" in items`, "返回 bool，避免手写搜索循环"]
+  ],
+  referenceTitle: "按数据关系选择容器",
+  referenceDescription: "先问数据是否有顺序、是否需要按键查找、是否允许重复，再选择结构。",
+  prediction: {
+    code: `items = ["torch", "map"]\nbackup = items\nbackup.append("rope")\nprint(len(items), items[-1])`,
+    choices: ["2 map", "3 rope", "3 map"],
+    answer: "3 rope",
+    explanation: "backup 和 items 指向同一个列表。append 原地修改该列表，因此 items 长度也变为 3，最后一个元素是 rope。"
+  },
+  quiz: [
+    {
+      question: "需要记录每种物品的数量，最适合哪种结构？",
+      options: ["字符串", "列表", "字典"],
+      answer: 2,
+      reason: "物品名称可以作为键，数量作为值，能够直接按名称查找和更新。"
+    },
+    {
+      question: "items = [\"a\", \"b\", \"c\"]，items[-1] 是什么？",
+      options: ["a", "b", "c"],
+      answer: 2,
+      reason: "负索引 -1 表示最后一个元素。"
+    },
+    {
+      question: "为什么不能执行 name[0] = \"A\"？",
+      options: ["字符串不可变", "索引只能从 1 开始", "字符串不能包含字母"],
+      answer: 0,
+      reason: "字符串是不可变对象。可以创建新字符串，但不能原地替换其中字符。"
+    },
+    {
+      question: "遍历列表时直接 remove 当前元素的主要风险是？",
+      options: ["一定语法错误", "索引移动导致部分元素被跳过", "列表会自动变成字典"],
+      answer: 1,
+      reason: "删除会让后续元素左移，而循环内部索引仍前进，可能跳过紧邻元素。"
+    }
+  ],
+  lab: {
+    kind: "collections",
+    title: "容器观察站",
+    subtitle: "把文本变成列表，再汇总为字典"
+  },
+  debugChallenge: {
+    code: `items = ["broken", "broken", "map"]\nfor item in items:\n    if item == "broken":\n        items.remove(item)\nprint(items)`,
+    question: "为什么结果里可能还留下一个 broken？",
+    choices: ["remove 只能删除数字", "删除后元素左移，循环索引跳过了相邻元素", "for 不能遍历列表"],
+    answer: 1,
+    error: `没有抛出异常，但错误结果为 ["broken", "map"]`,
+    fix: `items = [item for item in items if item != "broken"]`,
+    result: `items = ["map"]`,
+    explanation: "第一项删除后，第二个 broken 移到索引 0，但循环继续检查下一个索引，于是它被跳过。可以构造过滤后的新列表，或遍历列表副本。"
+  },
+  explanationChallenge: "为什么 backup = items 后，执行 backup.append(\"rope\") 会同时影响 items？它和字符串“修改”有什么不同？",
+  explanationHint: "建议提到：同一对象、引用、列表可变、字符串不可变、新值……",
+  evaluationGroups: [
+    ["同一", "对象"],
+    ["指向", "引用"],
+    ["列表", "可变"],
+    ["字符串", "不可变"],
+    ["新值", "创建"]
+  ],
+  codeChallenge: {
+    id: "inventory-summary",
+    title: "真实代码验收 · 物品计数器",
+    brief: "实现 summarize_inventory(items)，返回“物品名称 → 出现次数”的字典。不要修改输入列表。",
+    starter: `def summarize_inventory(items):\n    counts = {}\n    # 在这里遍历 items 并更新 counts\n    return counts`,
+    checks: ["正常列表", "空列表", "单个物品（隐藏）", "连续重复（隐藏）"]
+  }
+};
+
+export const pythonLessons = [firstLesson, secondLesson, thirdLesson, fourthLesson, fifthLesson];
 
 export const assessmentLevels = [
   {

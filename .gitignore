@@ -2,3 +2,5 @@
 node_modules/
 coverage/
 .env
+__pycache__/
+*.pyc

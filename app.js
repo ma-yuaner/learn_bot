@@ -10,7 +10,8 @@ const blankLessonProgress = () => ({
   debug: false,
   quiz: 0,
   explanation: 0,
-  project: false
+  project: false,
+  code: false
 });
 
 let state = loadState();
@@ -99,7 +100,9 @@ function renderLessonSwitcher() {
   document.querySelector("#lesson-switcher").innerHTML = pythonLessons.map((lesson, index) => {
     const progress = state.lessons[lesson.id] || blankLessonProgress();
     const lessonPassed = progress.quiz >= 80 && progress.explanation >= 60 && progress.debug;
-    const passed = lesson.moduleProject ? lessonPassed && progress.project : lessonPassed;
+    const projectPassed = !lesson.moduleProject || progress.project;
+    const codePassed = !lesson.codeChallenge || progress.code;
+    const passed = lessonPassed && projectPassed && codePassed;
     return `
       <button class="${lesson.id === state.activeLessonId ? "active" : ""}" data-lesson="${lesson.id}">
         <span>${String(index + 1).padStart(2, "0")}</span>${passed ? "已通过" : "学习"}
@@ -157,6 +160,7 @@ function renderLesson() {
   document.querySelector("#explanation-feedback").className = "feedback";
   document.querySelector("#concept-checkpoint-label").textContent = "我能用自己的话讲清本关四个核心概念及它们之间的关系。";
   renderModuleProject(lesson);
+  renderCodeChallenge(lesson);
 
   bindLessonInteractions();
   renderLessonSwitcher();
@@ -173,6 +177,20 @@ function renderModuleProject(lesson) {
     .map((item) => `<li>${item}</li>`)
     .join("");
   document.querySelector("#project-test-results").innerHTML = "";
+}
+
+function renderCodeChallenge(lesson) {
+  const section = document.querySelector("#code-challenge");
+  section.hidden = !lesson.codeChallenge;
+  if (!lesson.codeChallenge) return;
+  document.querySelector("#code-challenge-title").textContent = lesson.codeChallenge.title;
+  document.querySelector("#code-challenge-brief").textContent = lesson.codeChallenge.brief;
+  document.querySelector("#code-challenge-checks").innerHTML = lesson.codeChallenge.checks
+    .map((item) => `<li>${item}</li>`)
+    .join("");
+  document.querySelector("#learner-code").value = lesson.codeChallenge.starter;
+  document.querySelector("#runner-status").textContent = "等待提交";
+  document.querySelector("#code-results").innerHTML = "";
 }
 
 function renderWorkbench(kind) {
@@ -215,11 +233,21 @@ function renderWorkbench(kind) {
     return;
   }
 
+  if (kind === "loops") {
+    controls.innerHTML = `
+      <label>初始能量 energy<input id="loop-energy-input" type="number" value="14" min="0" max="100" /></label>
+      <label>每轮消耗 cost<input id="loop-cost-input" type="number" value="3" min="1" max="20" /></label>
+      <label>最多轮数 limit<input id="loop-limit-input" type="number" value="10" min="1" max="30" /></label>
+      <button class="primary-button" id="run-workbench">追踪循环 <span>▶</span></button>
+    `;
+    return;
+  }
+
   controls.innerHTML = `
-    <label>初始能量 energy<input id="loop-energy-input" type="number" value="14" min="0" max="100" /></label>
-    <label>每轮消耗 cost<input id="loop-cost-input" type="number" value="3" min="1" max="20" /></label>
-    <label>最多轮数 limit<input id="loop-limit-input" type="number" value="10" min="1" max="30" /></label>
-    <button class="primary-button" id="run-workbench">追踪循环 <span>▶</span></button>
+    <label>物品文本（逗号分隔）<input id="items-input" value="torch,map,torch,rope" /></label>
+    <label>查找目标 target<input id="target-input" value="torch" maxlength="20" /></label>
+    <label class="toggle-label"><input id="clean-input" type="checkbox" checked /> 去除首尾空格并忽略空项</label>
+    <button class="primary-button" id="run-workbench">构建容器 <span>▶</span></button>
   `;
 }
 
@@ -245,6 +273,7 @@ function renderProgress() {
     progress.quiz >= 80 && progress.explanation >= 60
   ];
   if (currentLesson().moduleProject) checkpointStates.push(progress.project);
+  if (currentLesson().codeChallenge) checkpointStates.push(progress.code);
   const completed = checkpointStates.filter(Boolean).length;
   const checkpointTotal = checkpointStates.length;
   const allScores = pythonLessons.map((lesson) => {
@@ -321,7 +350,15 @@ function bindLessonInteractions() {
       if (!correct) button.classList.add("wrong");
       showFeedback(
         document.querySelector("#debug-feedback"),
-        `<b>${correct ? "诊断正确。" : "诊断不准确，再检查每个值的类型。"}</b><br>${lesson.debugChallenge.explanation}<br><code>${escapeHtml(lesson.debugChallenge.fix)}</code>`,
+        `<b>${correct ? "诊断正确。" : "诊断不准确，请先追踪错误或错误结果。"}</b>
+        <span class="debug-label">原始错误 / 错误现象</span>
+        <code>${escapeHtml(lesson.debugChallenge.error)}</code>
+        <span class="debug-label">根因</span>
+        <span>${lesson.debugChallenge.explanation}</span>
+        <span class="debug-label">修复代码</span>
+        <code>${escapeHtml(lesson.debugChallenge.fix)}</code>
+        <span class="debug-label">执行结果</span>
+        <code>${escapeHtml(lesson.debugChallenge.result)}</code>`,
         correct
       );
       if (correct) {
@@ -353,6 +390,8 @@ function bindLessonInteractions() {
   document.querySelector("#evaluate-explanation").onclick = evaluateExplanation;
   const projectButton = document.querySelector("#run-project-tests");
   if (lesson.moduleProject) projectButton.onclick = runProjectTests;
+  const codeButton = document.querySelector("#submit-code");
+  if (lesson.codeChallenge) codeButton.onclick = submitLearnerCode;
 }
 
 function runWorkbench() {
@@ -408,7 +447,7 @@ function runWorkbench() {
       <div class="trace-row"><span>命中分支</span><b>${path} → ${action}</b></div>
       <div class="trace-row"><span>路径规则</span><b>命中后不再检查后续分支</b></div>
     `;
-  } else {
+  } else if (lesson.lab.kind === "loops") {
     const initialEnergy = Math.max(0, Number(document.querySelector("#loop-energy-input").value) || 0);
     const cost = Math.max(1, Number(document.querySelector("#loop-cost-input").value) || 1);
     const limit = Math.max(1, Math.floor(Number(document.querySelector("#loop-limit-input").value) || 1));
@@ -426,6 +465,22 @@ function runWorkbench() {
     trace = `${rows.join("")}
       <div class="trace-row"><span>不变量</span><b>${round} × ${cost} + ${energy} = ${initialEnergy}</b></div>
       <div class="trace-row"><span>终止证明</span><b>energy 每轮减少且有下界 0</b></div>
+    `;
+  } else {
+    const raw = document.querySelector("#items-input").value;
+    const target = document.querySelector("#target-input").value.trim();
+    const clean = document.querySelector("#clean-input").checked;
+    const pieces = raw.split(",");
+    const items = clean ? pieces.map((item) => item.trim()).filter(Boolean) : pieces;
+    const counts = {};
+    for (const item of items) counts[item] = (counts[item] || 0) + 1;
+    const targetCount = counts[target] || 0;
+    output = `列表：${JSON.stringify(items)}\n字典：${JSON.stringify(counts)}\n${target} 出现：${targetCount} 次`;
+    trace = `
+      <div class="trace-row"><span>原始值</span><b>str · ${escapeHtml(raw)}</b></div>
+      <div class="trace-row"><span>split 结果</span><b>list · ${escapeHtml(JSON.stringify(items))}</b></div>
+      <div class="trace-row"><span>汇总结果</span><b>dict · ${escapeHtml(JSON.stringify(counts))}</b></div>
+      <div class="trace-row"><span>按键查找</span><b>counts.get("${escapeHtml(target)}", 0) → ${targetCount}</b></div>
     `;
   }
 
@@ -461,6 +516,53 @@ function runProjectTests() {
     currentProgress().project = true;
     saveState();
     toast("L2 模块项目验收通过");
+  }
+}
+
+async function submitLearnerCode() {
+  const lesson = currentLesson();
+  if (!lesson.codeChallenge) return;
+  const button = document.querySelector("#submit-code");
+  const status = document.querySelector("#runner-status");
+  const resultsNode = document.querySelector("#code-results");
+  button.disabled = true;
+  status.textContent = "正在进行安全检查和测试…";
+  resultsNode.innerHTML = "";
+
+  try {
+    const response = await fetch("/api/evaluate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        challengeId: lesson.codeChallenge.id,
+        code: document.querySelector("#learner-code").value
+      })
+    });
+    const result = await response.json();
+    status.textContent = result.message || (result.ok ? "通过" : "未通过");
+    if (result.results) {
+      resultsNode.innerHTML = result.results.map((item) => `
+        <div class="project-test ${item.passed ? "passed" : "failed"}">
+          <span>${item.passed ? "✓" : "×"}</span>
+          <div>
+            <b>${item.name}</b>
+            <small>${item.actual === null ? "结果已隐藏" : `得到 ${escapeHtml(JSON.stringify(item.actual))}，期望 ${escapeHtml(JSON.stringify(item.expected))}`}</small>
+          </div>
+        </div>
+      `).join("");
+    } else {
+      resultsNode.innerHTML = `<div class="runner-error">${escapeHtml(result.message || "验收失败")}</div>`;
+    }
+    if (result.ok) {
+      currentProgress().code = true;
+      saveState();
+      toast("真实代码验收通过");
+    }
+  } catch {
+    status.textContent = "无法连接本地验收服务";
+    resultsNode.innerHTML = '<div class="runner-error">请确认使用 npm run dev 启动项目，而不是直接打开 HTML 文件。</div>';
+  } finally {
+    button.disabled = false;
   }
 }
 

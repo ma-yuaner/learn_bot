@@ -140,6 +140,7 @@ button { cursor: pointer; }
 .feedback { display: none; margin-top: 15px; padding: 13px; background: #ebe9df; font-size: 12px; line-height: 1.65; }
 .feedback.show { display: block; }
 .feedback code { display: block; margin-top: 8px; color: var(--green); white-space: pre-wrap; }
+.feedback .debug-label { display: block; margin-top: 12px; color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .1em; }
 
 .workbench { display: grid; grid-template-columns: .8fr 1.2fr; background: var(--ink); color: white; }
 .controls { padding: 30px; display: grid; gap: 18px; }
@@ -180,6 +181,20 @@ button { cursor: pointer; }
 .project-test > span { font-size: 18px; }
 .project-test b, .project-test small { display: block; }
 .project-test small { color: #94a198; margin-top: 3px; }
+
+.code-challenge-grid { display: grid; grid-template-columns: .75fr 1.25fr; background: var(--card); border: 1px solid var(--line); box-shadow: var(--shadow); }
+.challenge-spec { padding: 30px; }
+.challenge-spec > p { color: var(--muted); line-height: 1.8; margin: 23px 0; }
+.challenge-spec h3 { font: 20px Georgia, "Songti SC", serif; }
+.challenge-spec ul { padding-left: 20px; color: var(--muted); line-height: 1.8; font-size: 13px; }
+.challenge-spec > small { display: block; margin-top: 25px; padding: 13px; border: 1px dashed var(--line); color: var(--muted); line-height: 1.6; }
+.code-editor-panel { margin: 16px; background: #101713; color: white; min-width: 0; }
+.code-editor-panel textarea { display: block; width: 100%; min-height: 260px; resize: vertical; border: 0; padding: 24px; outline: 0; background: #101713; color: #e4eee7; font: 14px/1.8 ui-monospace, SFMono-Regular, Menlo, monospace; tab-size: 4; }
+.editor-actions { display: flex; align-items: center; gap: 18px; padding: 15px 20px; border-top: 1px solid #2f3933; }
+.editor-actions span { color: #91a097; font-size: 11px; }
+.editor-actions button:disabled { opacity: .55; cursor: wait; }
+#code-results { display: grid; gap: 7px; padding: 0 20px 20px; }
+.runner-error { padding: 13px; color: #ffd7cd; background: #46261f; border-left: 3px solid var(--coral); font-size: 12px; line-height: 1.6; }
 
 .path-intro { max-width: 720px; color: var(--muted); line-height: 1.8; margin: -10px 0 26px 60px; }
 .assessment-levels { display: grid; grid-template-columns: repeat(5, 1fr); border: 1px solid var(--line); }
@@ -222,7 +237,7 @@ button { cursor: pointer; }
   .hero { min-height: auto; padding: 55px 0; }
   .hero h1 { font-size: 48px; }
   .compass { display: none; }
-  .dashboard-grid, .lab-grid, .assessment-grid, .workbench, .project-shell { grid-template-columns: 1fr; }
+  .dashboard-grid, .lab-grid, .assessment-grid, .workbench, .project-shell, .code-challenge-grid { grid-template-columns: 1fr; }
   .objective-panel { grid-template-columns: 1fr; }
   .objective-panel ul { grid-template-columns: 1fr; }
   .concept-grid, .world-map { grid-template-columns: 1fr; }
