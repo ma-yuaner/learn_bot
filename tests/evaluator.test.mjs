@@ -145,3 +145,188 @@ def reverse_index_chain(next_indices, head):
   assert.equal(result.results.length, 4);
   assert.ok(result.results.every((item) => item.passed));
 });
+
+test("算法迷宫剩余章节的代码挑战全部通过公开与隐藏测试", () => {
+  const solutions = [
+    ["stack-brackets", `
+def check_brackets(text):
+    stack = []
+    pairs = {")": "(", "]": "[", "}": "{"}
+    max_depth = 0
+    for char in text:
+        if char in "([{":
+            stack.append(char)
+            max_depth = max(max_depth, len(stack))
+        elif char in ")]}":
+            if not stack or stack.pop() != pairs[char]:
+                return {"valid": False, "max_depth": max_depth}
+    return {"valid": not stack, "max_depth": max_depth}
+    `],
+    ["queue-events", `
+def run_queue(operations):
+    data = []
+    head = 0
+    dequeued = []
+    for operation in operations:
+        if operation == "dequeue":
+            if head < len(data):
+                dequeued.append(data[head])
+                head = head + 1
+            else:
+                dequeued.append(None)
+        else:
+            parts = operation.split(":")
+            data.append(parts[1])
+    return {"dequeued": dequeued, "remaining": data[head:]}
+    `],
+    ["hash-buckets", `
+def bucketize(keys, bucket_count):
+    buckets = [[] for _ in range(bucket_count)]
+    collisions = 0
+    for key in keys:
+        index = sum(ord(char) for char in key) % bucket_count
+        if buckets[index]:
+            collisions = collisions + 1
+        buckets[index].append(key)
+    return {"buckets": buckets, "collisions": collisions, "load": len(keys) / bucket_count}
+    `],
+    ["tree-height", `
+def array_tree_height(values):
+    if not values or values[0] is None:
+        return 0
+    stack = [(0, 1)]
+    height = 0
+    while stack:
+        index, depth = stack.pop()
+        if index >= len(values) or values[index] is None:
+            continue
+        height = max(height, depth)
+        stack.append((index * 2 + 1, depth + 1))
+        stack.append((index * 2 + 2, depth + 1))
+    return height
+    `],
+    ["bst-search-path", `
+def bst_search(values, target):
+    path = []
+    index = 0
+    while index < len(values) and values[index] is not None:
+        value = values[index]
+        path.append(value)
+        if value == target:
+            return {"path": path, "found": True}
+        if target < value:
+            index = index * 2 + 1
+        else:
+            index = index * 2 + 2
+    return {"path": path, "found": False}
+    `],
+    ["heap-push", `
+def min_heap_push(heap, value):
+    data = heap[:]
+    data.append(value)
+    index = len(data) - 1
+    swaps = 0
+    while index > 0:
+        parent = (index - 1) // 2
+        if data[parent] <= data[index]:
+            break
+        data[parent], data[index] = data[index], data[parent]
+        swaps = swaps + 1
+        index = parent
+    return {"heap": data, "swaps": swaps}
+    `],
+    ["graph-bfs", `
+def bfs_distances(adjacency, start):
+    distances = [-1] * len(adjacency)
+    distances[start] = 0
+    queue = [start]
+    head = 0
+    while head < len(queue):
+        node = queue[head]
+        head = head + 1
+        for neighbor in adjacency[node]:
+            if distances[neighbor] == -1:
+                distances[neighbor] = distances[node] + 1
+                queue.append(neighbor)
+    return distances
+    `],
+    ["insertion-sort-shifts", `
+def insertion_sort_with_shifts(values):
+    data = values[:]
+    shifts = 0
+    for index in range(1, len(data)):
+        key = data[index]
+        position = index - 1
+        while position >= 0 and data[position] > key:
+            data[position + 1] = data[position]
+            shifts = shifts + 1
+            position = position - 1
+        data[position + 1] = key
+    return {"values": data, "shifts": shifts}
+    `],
+    ["binary-search-trace", `
+def binary_search_trace(values, target):
+    left = 0
+    right = len(values) - 1
+    probes = []
+    while left <= right:
+        mid = (left + right) // 2
+        probes.append(mid)
+        if values[mid] == target:
+            return {"index": mid, "probes": probes}
+        if values[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+    return {"index": -1, "probes": probes}
+    `],
+    ["recursive-sum", `
+def recursive_sum(values):
+    if not values:
+        return 0
+    return values[0] + recursive_sum(values[1:])
+    `],
+    ["generate-subsets", `
+def generate_subsets(values):
+    if not values:
+        return [[]]
+    rest = generate_subsets(values[1:])
+    result = []
+    for subset in rest:
+        result.append(subset)
+    for subset in rest:
+        result.append([values[0]] + subset)
+    return result
+    `],
+    ["climb-ways", `
+def climb_ways(n):
+    if n < 0:
+        return 0
+    previous = 1
+    current = 1
+    for _ in range(2, n + 1):
+        previous, current = current, previous + current
+    return current
+    `],
+    ["recommend-structure", `
+def recommend_structure(requirements):
+    if "priority" in requirements:
+        return "heap"
+    if "key_lookup" in requirements and "recency" in requirements:
+        return "hash+doubly-linked-list"
+    if "fifo" in requirements:
+        return "queue"
+    if "lifo" in requirements:
+        return "stack"
+    if "random_index" in requirements:
+        return "dynamic-array"
+    return "list"
+    `]
+  ];
+
+  for (const [challengeId, code] of solutions) {
+    const result = evaluate(code.trim(), challengeId);
+    assert.equal(result.ok, true, `${challengeId}: ${result.message}`);
+    assert.ok(result.results.every((item) => item.passed), challengeId);
+  }
+});

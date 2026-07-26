@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node server.mjs",
-    "check": "node --check app.js && node --check data/curriculum.js && node --check data/python-advanced.js && node --check data/data-structures.js && node --check lib/expedition.js && node --check server.mjs",
+    "check": "node --check app.js && node --check data/curriculum.js && node --check data/python-advanced.js && node --check data/data-structures.js && node --check data/algorithm-advanced.js && node --check lib/expedition.js && node --check server.mjs",
     "test": "node --test"
   },
   "engines": {

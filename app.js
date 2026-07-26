@@ -398,6 +398,21 @@ function renderWorkbench(kind) {
     return;
   }
 
+  if (kind === "algorithm-studio") {
+    const lab = currentLesson().lab;
+    controls.innerHTML = `
+      <label>实验输入<input id="algorithm-studio-input" value="${escapeHtml(lab.defaultInput)}" /></label>
+      <label>目标 / 参数<input id="algorithm-studio-target" value="${escapeHtml(lab.defaultTarget)}" /></label>
+      <label>实验模式
+        <select id="algorithm-studio-mode">
+          ${lab.modes.map(([value, label]) => `<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`).join("")}
+        </select>
+      </label>
+      <button class="primary-button" id="run-workbench">运行算法并追踪状态 <span>▶</span></button>
+    `;
+    return;
+  }
+
   controls.innerHTML = `
     <label>物品文本（逗号分隔）<input id="items-input" value="torch,map,torch,rope" /></label>
     <label>查找目标 target<input id="target-input" value="torch" maxlength="20" /></label>
@@ -896,6 +911,382 @@ function runWorkbench() {
       <div class="trace-row"><span>节点身份</span><b>${escapeHtml(nodes.filter((node) => !node.removed).map((node) => `n${node.id}:${node.value}`).join("；") || "无")}</b></div>
       <div class="trace-row"><span>不变量检查</span><b>${operation === "cycle" ? "故意破坏 tail.next=None，用快慢指针取证" : `size=${activeCount}，从 head 可达 ${order.length} 个节点`}</b></div>
       <div class="trace-row"><span>复杂度</span><b>${operation === "insert" ? "已知节点后插入 O(1)；按索引定位仍为 O(n)" : "本操作需要遍历，O(n) 时间"}</b></div>
+    `;
+  } else if (lesson.lab.kind === "algorithm-studio") {
+    const raw = document.querySelector("#algorithm-studio-input").value.trim();
+    const targetText = document.querySelector("#algorithm-studio-target").value.trim();
+    const mode = document.querySelector("#algorithm-studio-mode").value;
+    const scenario = lesson.lab.scenario;
+    const tokens = raw.split(",").map((item) => item.trim()).filter(Boolean);
+    const numbers = tokens.map(Number).filter(Number.isFinite);
+    const steps = [];
+    let result = "";
+    let complexity = "";
+
+    if (scenario === "stack") {
+      const stack = [...tokens];
+      if (mode === "push") {
+        stack.push(targetText || "new");
+        steps.push(`push(${targetText || "new"})：新元素写入栈顶`);
+      } else {
+        const removed = stack.length ? stack.pop() : null;
+        steps.push(`${mode}：${removed === null ? "空栈，无元素可取" : `移除栈顶 ${removed}`}`);
+      }
+      result = `栈底 [ ${stack.join(" · ")} ] 栈顶\nsize=${stack.length}；peek=${stack.at(-1) ?? "None"}`;
+      complexity = "push/pop/peek 均为 O(1)（动态数组 push 为摊还 O(1)）";
+    } else if (scenario === "queue") {
+      const queue = [...tokens];
+      let head = 0;
+      const dequeued = [];
+      if (mode === "enqueue") {
+        queue.push(targetText || "new-task");
+        steps.push("写入队尾，不影响已有队首");
+      } else if (mode === "dequeue") {
+        if (head < queue.length) dequeued.push(queue[head++]);
+        steps.push(`推进 head 索引到 ${head}，不执行数组头部搬移`);
+      } else if (queue.length >= 3) {
+        steps.push("有界队列容量 3 已满：拒绝新任务并产生背压信号");
+      } else {
+        queue.push(targetText || "new-task");
+        steps.push("容量仍有余量：任务进入队尾");
+      }
+      result = `已出队：${JSON.stringify(dequeued)}\n剩余 FIFO：${JSON.stringify(queue.slice(head))}\n底层 head=${head}`;
+      complexity = "头索引 enqueue/dequeue 摊还 O(1)；容量治理是系统约束";
+    } else if (scenario === "hash") {
+      const bucketCount = Math.max(1, Math.min(20, Number(targetText) || 3));
+      const count = mode === "resize" ? bucketCount * 2 : bucketCount;
+      const buckets = Array.from({ length: count }, () => []);
+      let collisions = 0;
+      for (const key of tokens) {
+        const hash = [...key].reduce((sum, char) => sum + char.charCodeAt(0), 0);
+        const index = hash % count;
+        if (buckets[index].length) collisions += 1;
+        buckets[index].push(key);
+        steps.push(`${key}: hash=${hash} → bucket[${index}]`);
+      }
+      const lookup = tokens[0] || "";
+      result = `桶：${JSON.stringify(buckets)}\n冲突次数：${collisions}\n负载因子：${(tokens.length / count).toFixed(2)}${mode === "lookup" ? `\n查找 ${lookup}：只比较其所在桶` : ""}`;
+      complexity = "分布良好时平均 O(1)；最坏冲突 O(n)；扩容重散列 O(n)";
+    } else if (scenario === "tree") {
+      const values = tokens.map((value) => value.toLowerCase() === "null" ? null : value);
+      const walk = (index, order) => {
+        if (index >= values.length || values[index] === null) return;
+        if (order === "preorder") steps.push(values[index]);
+        walk(index * 2 + 1, order);
+        if (order === "inorder") steps.push(values[index]);
+        walk(index * 2 + 2, order);
+        if (order === "postorder") steps.push(values[index]);
+      };
+      if (mode === "level") {
+        values.forEach((value) => { if (value !== null) steps.push(value); });
+      } else {
+        walk(0, mode);
+      }
+      let height = 0;
+      values.forEach((value, index) => {
+        if (value !== null) height = Math.max(height, Math.floor(Math.log2(index + 1)) + 1);
+      });
+      result = `${mode}：${steps.join(" → ") || "空树"}\n按节点数计算高度：${height}`;
+      complexity = `访问每个非空节点一次，时间 O(n)；${mode === "level" ? "队列空间取决于最大层宽" : "栈空间取决于树高"}`;
+      steps.length = 0;
+      steps.push("索引 i 的左右孩子是 2i+1 与 2i+2");
+    } else if (scenario === "bst") {
+      const nodes = [];
+      const insert = (key) => {
+        if (!nodes.length) {
+          nodes.push({ key, left: -1, right: -1 });
+          return;
+        }
+        let current = 0;
+        while (true) {
+          const side = key < nodes[current].key ? "left" : "right";
+          if (nodes[current][side] === -1) {
+            nodes[current][side] = nodes.length;
+            nodes.push({ key, left: -1, right: -1 });
+            return;
+          }
+          current = nodes[current][side];
+        }
+      };
+      numbers.forEach(insert);
+      const target = Number(targetText);
+      if (mode === "insert" && Number.isFinite(target)) insert(target);
+      let current = nodes.length ? 0 : -1;
+      let found = false;
+      while (current !== -1 && Number.isFinite(target)) {
+        steps.push(`比较 ${target} 与 ${nodes[current].key}`);
+        if (nodes[current].key === target) {
+          found = true;
+          break;
+        }
+        current = target < nodes[current].key ? nodes[current].left : nodes[current].right;
+      }
+      const depths = nodes.map(() => 0);
+      if (nodes.length) {
+        const queue = [[0, 1]];
+        for (let head = 0; head < queue.length; head += 1) {
+          const [index, depth] = queue[head];
+          depths[index] = depth;
+          if (nodes[index].left !== -1) queue.push([nodes[index].left, depth + 1]);
+          if (nodes[index].right !== -1) queue.push([nodes[index].right, depth + 1]);
+        }
+      }
+      result = `节点数：${nodes.length}；高度：${Math.max(0, ...depths)}\n查找 ${targetText}：${found ? "命中" : "未命中"}\n路径长度：${steps.length}`;
+      complexity = "操作成本 O(h)；平衡时 h≈log n，退化时 h=n";
+    } else if (scenario === "heap") {
+      const data = [...numbers];
+      const down = (start) => {
+        let index = start;
+        while (true) {
+          const left = index * 2 + 1;
+          const right = left + 1;
+          let smallest = index;
+          if (left < data.length && data[left] < data[smallest]) smallest = left;
+          if (right < data.length && data[right] < data[smallest]) smallest = right;
+          if (smallest === index) break;
+          [data[index], data[smallest]] = [data[smallest], data[index]];
+          steps.push(`下沉交换索引 ${index} ↔ ${smallest}`);
+          index = smallest;
+        }
+      };
+      for (let index = Math.floor(data.length / 2) - 1; index >= 0; index -= 1) down(index);
+      if (mode === "push") {
+        data.push(Number(targetText) || 0);
+        let index = data.length - 1;
+        while (index > 0) {
+          const parent = Math.floor((index - 1) / 2);
+          if (data[parent] <= data[index]) break;
+          [data[parent], data[index]] = [data[index], data[parent]];
+          steps.push(`上浮交换索引 ${index} ↔ ${parent}`);
+          index = parent;
+        }
+      } else if (mode === "pop" && data.length) {
+        const root = data[0];
+        const last = data.pop();
+        if (data.length) {
+          data[0] = last;
+          down(0);
+        }
+        steps.unshift(`弹出根 ${root}，用末尾元素补根`);
+      }
+      result = `最小堆数组：${JSON.stringify(data)}\n堆顶：${data[0] ?? "None"}`;
+      complexity = mode === "heapify" ? "自底向上建堆 O(n)" : "push/pop 沿树高移动 O(log n)";
+    } else if (scenario === "graph") {
+      const graph = new Map();
+      const ensure = (node) => { if (!graph.has(node)) graph.set(node, []); };
+      for (const edge of tokens) {
+        const [from, to] = edge.split("-").map((item) => item?.trim());
+        if (!from || !to) continue;
+        ensure(from); ensure(to);
+        graph.get(from).push(to);
+        graph.get(to).push(from);
+      }
+      const start = graph.has(targetText) ? targetText : graph.keys().next().value;
+      const visited = new Set();
+      const visitFrom = (origin) => {
+        const frontier = [origin];
+        if (mode !== "dfs") visited.add(origin);
+        while (frontier.length) {
+          const node = mode === "dfs" ? frontier.pop() : frontier.shift();
+          if (visited.has(node) && mode === "dfs") continue;
+          visited.add(node);
+          steps.push(node);
+          const neighbors = graph.get(node) || [];
+          for (const neighbor of mode === "dfs" ? [...neighbors].reverse() : neighbors) {
+            if (!visited.has(neighbor)) {
+              if (mode !== "dfs") visited.add(neighbor);
+              frontier.push(neighbor);
+            }
+          }
+        }
+      };
+      if (start) visitFrom(start);
+      let components = start ? 1 : 0;
+      if (mode === "components") {
+        for (const node of graph.keys()) {
+          if (!visited.has(node)) {
+            components += 1;
+            visitFrom(node);
+          }
+        }
+      }
+      result = `访问顺序：${steps.join(" → ") || "空图"}\n顶点=${graph.size}；边=${tokens.length}${mode === "components" ? `；连通分量=${components}` : ""}`;
+      complexity = "邻接表遍历时间 O(V+E)，visited 空间 O(V)";
+      steps.length = 0;
+      steps.push(`${mode === "dfs" ? "栈" : "队列"}保存搜索前沿；发现节点时维护 visited`);
+    } else if (scenario === "sorting") {
+      const data = [...numbers];
+      if (mode === "insertion") {
+        for (let index = 1; index < data.length; index += 1) {
+          const key = data[index];
+          let position = index - 1;
+          while (position >= 0 && data[position] > key) {
+            data[position + 1] = data[position];
+            position -= 1;
+          }
+          data[position + 1] = key;
+          steps.push(`插入 ${key}：${JSON.stringify(data)}`);
+        }
+        complexity = "最坏 O(n²)，近乎有序时接近 O(n)，稳定且原地";
+      } else if (mode === "selection") {
+        for (let index = 0; index < data.length; index += 1) {
+          let minimum = index;
+          for (let scan = index + 1; scan < data.length; scan += 1) if (data[scan] < data[minimum]) minimum = scan;
+          [data[index], data[minimum]] = [data[minimum], data[index]];
+          steps.push(`选择位置 ${index}：${JSON.stringify(data)}`);
+        }
+        complexity = "始终 O(n²) 比较，原地但通常不稳定";
+      } else {
+        const mergeSort = (items) => {
+          if (items.length <= 1) return items;
+          const middle = Math.floor(items.length / 2);
+          const left = mergeSort(items.slice(0, middle));
+          const right = mergeSort(items.slice(middle));
+          const merged = [];
+          let a = 0; let b = 0;
+          while (a < left.length || b < right.length) {
+            if (b >= right.length || (a < left.length && left[a] <= right[b])) merged.push(left[a++]);
+            else merged.push(right[b++]);
+          }
+          steps.push(`合并 ${JSON.stringify(left)} + ${JSON.stringify(right)} → ${JSON.stringify(merged)}`);
+          return merged;
+        };
+        data.splice(0, data.length, ...mergeSort(data));
+        complexity = "稳定 O(n log n)，标准数组实现使用 O(n) 辅助空间";
+      }
+      result = `排序结果：${JSON.stringify(data)}\n步骤数：${steps.length}`;
+    } else if (scenario === "binary-search") {
+      const data = [...numbers].sort((a, b) => a - b);
+      const target = Number(targetText);
+      let left = 0;
+      let right = mode === "exact" ? data.length - 1 : data.length;
+      let answer = -1;
+      if (mode === "exact") {
+        while (left <= right) {
+          const mid = Math.floor((left + right) / 2);
+          steps.push(`[${left},${right}] mid=${mid} value=${data[mid]}`);
+          if (data[mid] === target) { answer = mid; break; }
+          if (data[mid] < target) left = mid + 1; else right = mid - 1;
+        }
+      } else {
+        while (left < right) {
+          const mid = Math.floor((left + right) / 2);
+          steps.push(`[${left},${right}) mid=${mid} value=${data[mid]}`);
+          if (data[mid] < target || (mode === "upper" && data[mid] === target)) left = mid + 1;
+          else right = mid;
+        }
+        answer = left;
+      }
+      result = `有序数据：${JSON.stringify(data)}\n${mode === "exact" ? "命中索引" : "边界插入点"}：${answer}`;
+      complexity = "候选区间每轮至少减半，时间 O(log n)，空间 O(1)";
+    } else if (scenario === "recursion") {
+      const n = Math.max(0, Math.min(20, Number(raw) || 0));
+      if (mode === "factorial") {
+        let value = 1;
+        for (let current = n; current > 0; current -= 1) {
+          steps.push(`调用 f(${current})，等待 f(${current - 1}) 返回`);
+          value *= current;
+        }
+        result = `${n}! = ${value}\n最大栈深：${n + 1}`;
+        complexity = "时间 O(n)，调用栈 O(n)";
+      } else if (mode === "fibonacci") {
+        const calls = n <= 1 ? 1 : Math.round((2 * ((1 + Math.sqrt(5)) / 2) ** n) / Math.sqrt(5) - 1);
+        result = `朴素 fib(${n}) 调用数约 ${calls}\n存在大量重复子问题`;
+        steps.push("同一个 fib(k) 会从多个父分支重复展开");
+        complexity = "朴素递归指数时间；记忆化后 O(n)";
+      } else {
+        const depth = n <= 1 ? 0 : Math.ceil(Math.log2(n));
+        result = `规模 ${n} 连续减半，到基例约需 ${depth} 层`;
+        steps.push(`${n} → ${Math.floor(n / 2)} → … → 1`);
+        complexity = "单分支减半递归深度 O(log n)";
+      }
+    } else if (scenario === "backtracking") {
+      const limit = Math.min(tokens.length, 7);
+      const items = tokens.slice(0, limit);
+      let solutions = [];
+      if (mode === "subsets" || mode === "choose-k") {
+        const wanted = Math.max(0, Number(targetText) || 0);
+        const search = (index, path) => {
+          if (mode === "choose-k" && path.length > wanted) return;
+          if (index === items.length) {
+            if (mode !== "choose-k" || path.length === wanted) solutions.push([...path]);
+            return;
+          }
+          search(index + 1, path);
+          path.push(items[index]);
+          search(index + 1, path);
+          path.pop();
+        };
+        search(0, []);
+      } else {
+        const search = (path, used) => {
+          if (path.length === items.length) {
+            solutions.push([...path]);
+            return;
+          }
+          items.forEach((item, index) => {
+            if (used.has(index)) return;
+            used.add(index); path.push(item);
+            search(path, used);
+            path.pop(); used.delete(index);
+          });
+        };
+        search([], new Set());
+      }
+      solutions = solutions.slice(0, 200);
+      result = `生成 ${solutions.length} 个结果（界面最多展示 200）\n${JSON.stringify(solutions)}`;
+      steps.push("每层：检查约束 → 做选择 → 递归 → 撤销选择");
+      complexity = mode === "permutations" ? "排列搜索空间 n!" : "子集搜索空间 2^n；剪枝减少实际节点";
+    } else if (scenario === "dp") {
+      const n = Math.max(0, Math.min(100, Number(raw) || 0));
+      if (mode === "climb") {
+        let previous = 1; let current = 1;
+        for (let index = 2; index <= n; index += 1) {
+          [previous, current] = [current, previous + current];
+          steps.push(`dp[${index}] = ${current}`);
+        }
+        result = `到达 ${n} 阶的方法数：${n <= 1 ? 1 : current}`;
+        complexity = "时间 O(n)，压缩后额外空间 O(1)";
+      } else if (mode === "fibonacci") {
+        let a = 0; let b = 1;
+        for (let index = 1; index <= n; index += 1) {
+          steps.push(`fib[${index}] = ${b}`);
+          [a, b] = [b, a + b];
+        }
+        result = `fib(${n}) = ${a}`;
+        complexity = "每个状态只计算一次，O(n) 时间、O(1) 空间";
+      } else {
+        const coins = targetText.split(",").map(Number).filter((value) => Number.isFinite(value) && value > 0);
+        const dp = [0, ...Array(n).fill(Infinity)];
+        for (let amount = 1; amount <= n; amount += 1) {
+          for (const coin of coins) if (coin <= amount) dp[amount] = Math.min(dp[amount], dp[amount - coin] + 1);
+          steps.push(`dp[${amount}] = ${Number.isFinite(dp[amount]) ? dp[amount] : "不可达"}`);
+        }
+        result = `凑出 ${n} 的最少硬币：${Number.isFinite(dp[n]) ? dp[n] : "不可达"}`;
+        complexity = "状态数 n × 硬币种类数，时间 O(nk)、空间 O(n)";
+      }
+    } else {
+      const requirements = new Set(tokens);
+      const stage = mode;
+      let recommendation = "dynamic-array / 标准列表";
+      if (requirements.has("priority")) recommendation = "heap / priority queue";
+      else if (requirements.has("key-lookup") && requirements.has("recency-update")) recommendation = "hash table + doubly linked list";
+      else if (requirements.has("fifo")) recommendation = "queue / deque";
+      else if (requirements.has("lifo")) recommendation = "stack";
+      const governance = {
+        prototype: "标准库或单体内存结构；先补测试、容量上限和持久化判断",
+        growth: "增加指标、有界队列、重试/死信、压测和明确所有权",
+        scale: "按证据评估分区、复制、跨地域容灾、平台治理和成本"
+      }[stage];
+      result = `推荐：${recommendation}\n公司阶段：${stage}\n治理强度：${governance}\n规模参数：${targetText}`;
+      steps.push("先读操作比例和顺序语义", "比较候选的时间、空间与实现成本", "按团队阶段设置演进触发器");
+      complexity = "不存在脱离工作负载和组织能力的全局最优结构";
+    }
+
+    output = result;
+    trace = `${steps.slice(0, 18).map((step, index) => `<div class="trace-row"><span>轨迹 ${index + 1}</span><b>${escapeHtml(step)}</b></div>`).join("")}
+      <div class="trace-row"><span>复杂度结论</span><b>${escapeHtml(complexity)}</b></div>
+      <div class="trace-row"><span>验证口径</span><b>同时检查正常、空输入、边界与最坏结构</b></div>
     `;
   } else {
     const change = document.querySelector("#change-input").value;

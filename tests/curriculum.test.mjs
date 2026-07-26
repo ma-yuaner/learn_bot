@@ -76,7 +76,7 @@ test("多区域课程目录将已开放区域映射到独立关卡", () => {
   assert.equal(lessonCatalog.python, pythonLessons);
   assert.equal(lessonCatalog.algorithm, dataStructureLessons);
   assert.equal(tracks.find((track) => track.id === "algorithm").available, true);
-  assert.equal(dataStructureLessons.length, 3);
+  assert.equal(dataStructureLessons.length, 16);
 });
 
 test("数据结构 DS01 具备学习、实验、诊断、表达与代码验收闭环", () => {
@@ -133,6 +133,36 @@ test("数据结构 DS03 覆盖链表改线、反转和环检测", () => {
   assert.ok(lesson.referenceAnswer.length >= 120);
   assert.equal(lesson.codeChallenge.id, "reverse-index-chain");
   assert.match(lesson.codeChallenge.starter, /^def reverse_index_chain/);
+});
+
+test("算法迷宫 16 章全部符合学习闭环协议", () => {
+  const expectedIds = [
+    "ds-complexity", "ds-dynamic-array", "ds-linked-list", "ds-stack",
+    "ds-queue-deque", "ds-hash-table", "ds-binary-tree", "ds-bst",
+    "ds-heap", "ds-graph", "ds-sorting", "ds-binary-search",
+    "ds-recursion", "ds-backtracking", "ds-dynamic-programming", "ds-structure-selection"
+  ];
+  assert.deepEqual(dataStructureLessons.map((lesson) => lesson.id), expectedIds);
+  for (const lesson of dataStructureLessons) {
+    assert.equal(lesson.trackId, "algorithm");
+    assert.equal(lesson.objectives.length, 4, `${lesson.id} 学习目标不完整`);
+    assert.ok(lesson.concepts.length >= 4, `${lesson.id} 概念不足`);
+    assert.ok(lesson.types.length >= 4, `${lesson.id} 操作对照不足`);
+    assert.ok(lesson.prediction.choices.includes(lesson.prediction.answer));
+    assert.ok(lesson.quiz.length >= 4, `${lesson.id} 测验不足`);
+    assert.ok(lesson.quiz.every((item) => item.options[item.answer] && item.reason.length > 10));
+    assert.ok(lesson.lab.kind);
+    assert.ok(lesson.debugChallenge.choices[lesson.debugChallenge.answer]);
+    assert.ok(lesson.debugChallenge.error && lesson.debugChallenge.fix && lesson.debugChallenge.result);
+    assert.ok(lesson.evaluationGroups.length >= 5);
+    assert.ok(lesson.referenceAnswer.length >= 100, `${lesson.id} 参考答案过短`);
+    assert.ok(lesson.codeChallenge?.id, `${lesson.id} 缺少真实代码挑战`);
+    assert.match(lesson.codeChallenge.starter, /^def /);
+    assert.ok(lesson.codeChallenge.checks.length >= 4);
+  }
+  assert.ok(dataStructureLessons.at(-1).graduation);
+  assert.ok(dataStructureLessons.at(-1).graduation.title.includes("L3"));
+  assert.ok(dataStructureLessons.at(-1).graduation.requirements.length >= 8);
 });
 
 test("Python 平原覆盖培训讲义后半程关键主题", () => {

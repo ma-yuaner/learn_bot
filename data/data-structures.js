@@ -1,3 +1,5 @@
+import { advancedAlgorithmLessons } from "./algorithm-advanced.js";
+
 export const dataStructureLessons = [
   {
     id: "ds-complexity",
@@ -215,13 +217,13 @@ export const dataStructureLessons = [
   {
     id: "ds-linked-list",
     trackId: "algorithm",
-    title: "DS03 · 链表与引用改写",
+    title: "DS03 · 单向、双向链表与引用改写",
     duration: "110–150 分钟",
     objectives: [
       "画出节点、数据域、next 引用和 head/tail 指针之间的关系",
       "推演头部、中间、尾部插入删除，并正确处理空链和单节点边界",
       "使用三指针反转链表，解释为什么必须先保存 next_node",
-      "使用快慢指针检测环，并比较链表与动态数组的真实取舍"
+      "比较单向/双向链表，使用快慢指针检测环并完成工程取舍"
     ],
     concepts: [
       {
@@ -230,7 +232,7 @@ export const dataStructureLessons = [
       },
       {
         term: "head、tail 与不变量",
-        detail: "head 指向首节点，tail 指向尾节点；无环单链表通常满足 tail.next is None。空链时 head 和 tail 都应为空，size 必须等于从 head 可达的节点数。"
+        detail: "head 指向首节点，tail 指向尾节点；无环单链表满足 tail.next is None。双向链表还维护 prev，并要求 node.next.prev 与 node.prev.next 对称。空链时 head、tail 都为空。"
       },
       {
         term: "局部改线",
@@ -244,7 +246,7 @@ export const dataStructureLessons = [
     types: [
       ["头部插入", "改 head 和一个 next", "O(1)", "空链时还要同步 tail"],
       ["已知节点后插入", "改两个 next", "O(1)", "若插到尾部要更新 tail"],
-      ["按索引查找/删除", "先遍历定位", "O(n)", "删除本身改线是 O(1)"],
+      ["双向链表删除", "改前后邻居两侧引用", "已知节点 O(1)", "额外 prev 空间与更多不变量"],
       ["反转/环检测", "遍历整条可达链", "O(n)", "可做到 O(1) 额外空间"]
     ],
     referenceTitle: "链表不是“更快的列表”",
@@ -319,5 +321,6 @@ export const dataStructureLessons = [
       starter: `def reverse_index_chain(next_indices, head):\n    links = next_indices[:]\n    previous = -1\n    current = head\n    # 先保存原后继，再改写当前链接\n    return {\"head\": previous, \"next\": links, \"order\": []}`,
       checks: ["三节点完整链", "空链", "单节点（隐藏）", "非零 head 且含不可达节点（隐藏）"]
     }
-  }
+  },
+  ...advancedAlgorithmLessons
 ];

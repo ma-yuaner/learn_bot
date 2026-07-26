@@ -59,7 +59,142 @@ CHALLENGES = {
             {"name": "单节点", "args": [[-1], 0], "expected": {"head": 0, "next": [-1], "order": [0]}, "visible": False},
             {"name": "非零头与不可达节点", "args": [[-1, 3, -1, -1], 1], "expected": {"head": 3, "next": [-1, -1, -1, 1], "order": [3, 1]}, "visible": False},
         ],
+    },
+    "stack-brackets": {
+        "function": "check_brackets",
+        "tests": [
+            {"name": "正确嵌套", "args": ["([]){}"], "expected": {"valid": True, "max_depth": 2}, "visible": True},
+            {"name": "类型错配", "args": ["([)]"], "expected": {"valid": False, "max_depth": 2}, "visible": True},
+            {"name": "多余右括号", "args": ["]"], "expected": {"valid": False, "max_depth": 0}, "visible": False},
+            {"name": "空文本", "args": [""], "expected": {"valid": True, "max_depth": 0}, "visible": False},
+        ],
+    },
+    "queue-events": {
+        "function": "run_queue",
+        "tests": [
+            {"name": "交错操作", "args": [["enqueue:A", "enqueue:B", "dequeue", "enqueue:C"]], "expected": {"dequeued": ["A"], "remaining": ["B", "C"]}, "visible": True},
+            {"name": "空队列出队", "args": [["dequeue"]], "expected": {"dequeued": [None], "remaining": []}, "visible": True},
+            {"name": "只入队", "args": [["enqueue:X", "enqueue:Y"]], "expected": {"dequeued": [], "remaining": ["X", "Y"]}, "visible": False},
+            {"name": "全部消费", "args": [["enqueue:X", "dequeue", "dequeue"]], "expected": {"dequeued": ["X", None], "remaining": []}, "visible": False},
+        ],
+    },
+    "hash-buckets": {
+        "function": "bucketize",
+        "tests": [
+            {"name": "存在冲突", "args": [["ab", "ba", "ad"], 3], "expected": {"buckets": [["ab", "ba"], [], ["ad"]], "collisions": 1, "load": 1.0}, "visible": True},
+            {"name": "空键列表", "args": [[], 4], "expected": {"buckets": [[], [], [], []], "collisions": 0, "load": 0.0}, "visible": True},
+            {"name": "单桶退化", "args": [["a", "b"], 1], "expected": {"buckets": [["a", "b"]], "collisions": 1, "load": 2.0}, "visible": False},
+            {"name": "多桶分布", "args": [["a"], 2], "expected": {"buckets": [[], ["a"]], "collisions": 0, "load": 0.5}, "visible": False},
+        ],
+    },
+    "tree-height": {
+        "function": "array_tree_height",
+        "tests": [
+            {"name": "非完整树", "args": [["A", "B", "C", None, "E", None, "F"]], "expected": 3, "visible": True},
+            {"name": "空树", "args": [[]], "expected": 0, "visible": True},
+            {"name": "单节点", "args": [["root"]], "expected": 1, "visible": False},
+            {"name": "稀疏右链", "args": [["A", None, "B", None, None, None, "C"]], "expected": 3, "visible": False},
+        ],
+    },
+    "bst-search-path": {
+        "function": "bst_search",
+        "tests": [
+            {"name": "命中深层节点", "args": [[8, 3, 10, 1, 6, None, 14, None, None, 4, 7, None, None, 13], 7], "expected": {"path": [8, 3, 6, 7], "found": True}, "visible": True},
+            {"name": "目标不存在", "args": [[8, 3, 10, 1, 6, None, 14, None, None, 4, 7, None, None, 13], 5], "expected": {"path": [8, 3, 6, 4], "found": False}, "visible": True},
+            {"name": "空树", "args": [[], 1], "expected": {"path": [], "found": False}, "visible": False},
+            {"name": "根节点命中", "args": [[8, 3, 10], 8], "expected": {"path": [8], "found": True}, "visible": False},
+        ],
+    },
+    "heap-push": {
+        "function": "min_heap_push",
+        "tests": [
+            {"name": "上浮到根", "args": [[2, 5, 4, 9], 1], "expected": {"heap": [1, 2, 4, 9, 5], "swaps": 2}, "visible": True},
+            {"name": "无需交换", "args": [[1, 3, 2], 4], "expected": {"heap": [1, 3, 2, 4], "swaps": 0}, "visible": True},
+            {"name": "空堆", "args": [[], 5], "expected": {"heap": [5], "swaps": 0}, "visible": False},
+            {"name": "上浮一层", "args": [[1, 4, 2, 9], 3], "expected": {"heap": [1, 3, 2, 9, 4], "swaps": 1}, "visible": False},
+        ],
+    },
+    "graph-bfs": {
+        "function": "bfs_distances",
+        "tests": [
+            {"name": "分叉图", "args": [[[1, 2], [3], [3], []], 0], "expected": [0, 1, 1, 2], "visible": True},
+            {"name": "不可达点", "args": [[[1], [0], []], 0], "expected": [0, 1, -1], "visible": True},
+            {"name": "单节点", "args": [[[]], 0], "expected": [0], "visible": False},
+            {"name": "环图", "args": [[[1], [2], [0]], 0], "expected": [0, 1, 2], "visible": False},
+        ],
+    },
+    "insertion-sort-shifts": {
+        "function": "insertion_sort_with_shifts",
+        "tests": [
+            {"name": "逆序输入", "args": [[3, 2, 1]], "expected": {"values": [1, 2, 3], "shifts": 3}, "visible": True},
+            {"name": "已有序", "args": [[1, 2, 3]], "expected": {"values": [1, 2, 3], "shifts": 0}, "visible": True},
+            {"name": "重复值", "args": [[2, 1, 2]], "expected": {"values": [1, 2, 2], "shifts": 1}, "visible": False},
+            {"name": "空列表", "args": [[]], "expected": {"values": [], "shifts": 0}, "visible": False},
+        ],
+    },
+    "binary-search-trace": {
+        "function": "binary_search_trace",
+        "tests": [
+            {"name": "命中", "args": [[2, 4, 6, 8, 10], 8], "expected": {"index": 3, "probes": [2, 3]}, "visible": True},
+            {"name": "未命中", "args": [[2, 4, 6, 8, 10], 5], "expected": {"index": -1, "probes": [2, 0, 1]}, "visible": True},
+            {"name": "空列表", "args": [[], 1], "expected": {"index": -1, "probes": []}, "visible": False},
+            {"name": "单元素", "args": [[5], 5], "expected": {"index": 0, "probes": [0]}, "visible": False},
+        ],
+    },
+    "recursive-sum": {
+        "function": "recursive_sum",
+        "tests": [
+            {"name": "普通列表", "args": [[1, 2, 3, 4]], "expected": 10, "visible": True},
+            {"name": "空列表", "args": [[]], "expected": 0, "visible": True},
+            {"name": "含负数", "args": [[5, -2, -3]], "expected": 0, "visible": False},
+            {"name": "单元素", "args": [[9]], "expected": 9, "visible": False},
+        ],
+    },
+    "generate-subsets": {
+        "function": "generate_subsets",
+        "tests": [
+            {"name": "两个元素", "args": [["A", "B"]], "expected": [[], ["B"], ["A"], ["A", "B"]], "visible": True},
+            {"name": "空列表", "args": [[]], "expected": [[]], "visible": True},
+            {"name": "单元素", "args": [["X"]], "expected": [[], ["X"]], "visible": False},
+            {"name": "三个元素", "args": [[1, 2, 3]], "expected": [[], [3], [2], [2, 3], [1], [1, 3], [1, 2], [1, 2, 3]], "visible": False},
+        ],
+    },
+    "climb-ways": {
+        "function": "climb_ways",
+        "tests": [
+            {"name": "五阶", "args": [5], "expected": 8, "visible": True},
+            {"name": "零阶", "args": [0], "expected": 1, "visible": True},
+            {"name": "负数", "args": [-2], "expected": 0, "visible": False},
+            {"name": "十阶", "args": [10], "expected": 89, "visible": False},
+        ],
+    },
+    "recommend-structure": {
+        "function": "recommend_structure",
+        "tests": [
+            {"name": "优先级最高", "args": [["fifo", "priority"]], "expected": "heap", "visible": True},
+            {"name": "LRU 组合", "args": [["key_lookup", "recency"]], "expected": "hash+doubly-linked-list", "visible": True},
+            {"name": "FIFO", "args": [["fifo"]], "expected": "queue", "visible": False},
+            {"name": "LIFO", "args": [["lifo"]], "expected": "stack", "visible": False},
+            {"name": "随机索引", "args": [["random_index"]], "expected": "dynamic-array", "visible": False},
+            {"name": "默认", "args": [[]], "expected": "list", "visible": False},
+        ],
     }
+}
+
+GENERIC_CHALLENGES = {
+    "stack-brackets",
+    "queue-events",
+    "hash-buckets",
+    "tree-height",
+    "bst-search-path",
+    "heap-push",
+    "graph-bfs",
+    "insertion-sort-shifts",
+    "binary-search-trace",
+    "recursive-sum",
+    "generate-subsets",
+    "climb-ways",
+    "recommend-structure",
 }
 
 SAFE_BUILTINS = {
@@ -73,6 +208,7 @@ SAFE_BUILTINS = {
     "list": list,
     "max": max,
     "min": min,
+    "ord": ord,
     "range": range,
     "set": set,
     "sorted": sorted,
@@ -82,7 +218,7 @@ SAFE_BUILTINS = {
     "ValueError": ValueError,
 }
 
-ALLOWED_ATTRIBUTES = {"append", "count", "get", "items", "keys", "lower", "split", "strip", "values"}
+ALLOWED_ATTRIBUTES = {"append", "count", "get", "items", "keys", "lower", "pop", "split", "strip", "values"}
 BANNED_NODES = (
     ast.AsyncFunctionDef,
     ast.Await,
@@ -134,7 +270,7 @@ class SafetyVisitor(ast.NodeVisitor):
         self.visit(node.value)
 
     def visit_Call(self, node):
-        if isinstance(node.func, ast.Name) and node.func.id not in SAFE_BUILTINS:
+        if isinstance(node.func, ast.Name) and node.func.id not in SAFE_BUILTINS and node.func.id != self.expected_function:
             self.errors.append(f"不允许调用 {node.func.id}")
         elif not isinstance(node.func, (ast.Name, ast.Attribute)):
             self.errors.append("不允许这种动态调用方式")
@@ -156,6 +292,24 @@ def apply_limits():
 
 def fail(message, category="validation"):
     return {"ok": False, "category": category, "message": message}
+
+
+def is_small_json_value(value, depth=0):
+    if depth > 8:
+        return False
+    if value is None or isinstance(value, (bool, str)):
+        return not isinstance(value, str) or len(value) <= 1000
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        return abs(value) < 10 ** 100
+    if isinstance(value, list):
+        return len(value) <= 200 and all(is_small_json_value(item, depth + 1) for item in value)
+    if isinstance(value, dict):
+        return (
+            len(value) <= 100
+            and all(isinstance(key, str) and len(key) <= 100 for key in value)
+            and all(is_small_json_value(item, depth + 1) for item in value.values())
+        )
+    return False
 
 
 def validate_result(challenge_id, actual):
@@ -243,6 +397,9 @@ def validate_result(challenge_id, actual):
             )
         )
         return valid, "返回值必须包含合法的 head、next 索引列表和不重复的 order 索引列表"
+
+    if challenge_id in GENERIC_CHALLENGES:
+        return is_small_json_value(actual), "返回值必须是规模受限的 JSON 基础值、列表或字符串键字典"
 
     valid = (
         isinstance(actual, dict)
