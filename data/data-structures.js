@@ -100,5 +100,116 @@ export const dataStructureLessons = [
       starter: `def linear_search_with_count(items, target):\n    # 返回 {\"index\": ..., \"checks\": ...}\n    pass`,
       checks: ["目标在中间", "目标不存在", "目标在第一项（隐藏）", "空列表（隐藏）"]
     }
+  },
+  {
+    id: "ds-dynamic-array",
+    trackId: "algorithm",
+    title: "DS02 · 数组与动态数组",
+    duration: "100–140 分钟",
+    objectives: [
+      "解释数组为什么能按索引 O(1) 访问，以及这一结论依赖的存储模型",
+      "区分逻辑长度 size 与底层容量 capacity，推演扩容和元素复制",
+      "计算尾部追加、任意位置插入与删除产生的搬移次数",
+      "从零实现最小动态数组追加过程，并用摊还分析解释连续 append"
+    ],
+    concepts: [
+      {
+        term: "连续槽位与索引",
+        detail: "数组把等宽槽位按顺序组织。已知起始位置和元素宽度后，可直接计算第 i 个槽位的位置，因此随机访问是 O(1)；Python list 实际连续保存的是对象引用。"
+      },
+      {
+        term: "size 与 capacity",
+        detail: "size 是当前有效元素数，capacity 是底层已申请槽位数，必须满足 0 ≤ size ≤ capacity。未使用槽位是预留空间，不属于逻辑内容。"
+      },
+      {
+        term: "扩容与复制",
+        detail: "容量用尽时不能凭空延长原存储区，通常要申请更大的新区域、复制旧元素引用、再释放旧区域。单次扩容可能是 O(n)。"
+      },
+      {
+        term: "摊还复杂度",
+        detail: "按倍数扩容时，昂贵复制不会每次追加都发生。把一系列追加的总成本平均到每次操作，尾部 append 的摊还时间是 O(1)，但单次最坏仍是 O(n)。"
+      }
+    ],
+    types: [
+      ["arr[i]", "随机访问", "O(1)", "直接计算槽位，仍需检查索引边界"],
+      ["append", "尾部追加", "摊还 O(1)", "扩容发生时单次最坏 O(n)"],
+      ["insert(i)", "中间插入", "O(n)", "为新元素从尾到头搬移后缀"],
+      ["delete(i)", "中间删除", "O(n)", "向前填补空位并更新 size"]
+    ],
+    referenceTitle: "Python list 背后的动态数组模型",
+    referenceDescription: "列表 API 很简单，但容量、复制、搬移和对象引用决定了它的性能边界。",
+    prediction: {
+      code: `items = ["A", "B", "C", None]\nsize = 3\nindex = 1\nfor i in range(size, index, -1):\n    items[i] = items[i - 1]\nitems[index] = "X"\nsize += 1\nprint(items, size)`,
+      choices: [
+        `["A", "X", "B", "C"] 4`,
+        `["A", "X", "C", None] 4`,
+        `IndexError`
+      ],
+      answer: `["A", "X", "B", "C"] 4`,
+      explanation: "循环依次执行 i=3、2，把 C、B 从后向前移动，避免尚未复制的值被覆盖；随后 X 写入索引 1，逻辑长度变为 4。"
+    },
+    quiz: [
+      {
+        question: "动态数组 size=4、capacity=8 表示什么？",
+        options: ["有 8 个有效元素", "有 4 个有效元素和 4 个预留槽位", "索引最大可以直接使用 8"],
+        answer: 1,
+        reason: "逻辑内容只包含索引 0 到 size-1；capacity 描述底层空间，不代表这些槽位已经有有效元素。"
+      },
+      {
+        question: "容量已满时尾部 append 为什么单次可能是 O(n)？",
+        options: ["需要排序全部元素", "需要申请新区域并复制已有元素", "索引访问会变成递归"],
+        answer: 1,
+        reason: "扩容通常要把 n 个已有引用复制到新区域，然后才能写入新元素。"
+      },
+      {
+        question: "向索引 1 插入元素时，为什么应从后向前搬移？",
+        options: ["避免覆盖还没有被搬走的旧元素", "因为索引只能倒序访问", "这样就一定不需要扩容"],
+        answer: 0,
+        reason: "若从前向后复制，前一次写入可能覆盖下一次仍需读取的源值。"
+      },
+      {
+        question: "“append 是 O(1)”更严谨的表达是什么？",
+        options: ["每一次 append 都严格只执行一步", "倍增扩容下摊还 O(1)，单次最坏 O(n)", "append 的空间复杂度永远是 O(0)"],
+        answer: 1,
+        reason: "大多数追加只写一个槽位，少数扩容会复制已有元素；对操作序列平均后为常数成本。"
+      }
+    ],
+    lab: {
+      kind: "dynamic-array",
+      title: "动态数组内存工作台",
+      subtitle: "亲手改变 size、capacity、插入位置，观察扩容复制与元素搬移"
+    },
+    debugChallenge: {
+      code: `items = ["A", "B", "C", "D"]\nsize = 4\nindex = 1\n# 删除 items[index]，把后续元素左移\nfor i in range(index, size):\n    items[i] = items[i + 1]\nsize -= 1`,
+      question: "这段删除代码会发生什么，正确边界是什么？",
+      choices: [
+        "正确删除 B，结果没有任何问题",
+        "最后一次访问 items[4] 触发 IndexError；循环应到 size-2",
+        "range 不能用于数组"
+      ],
+      answer: 1,
+      error: "当 i=size-1=3 时读取 items[i+1]，也就是 items[4]，超过最后有效索引 3，触发 IndexError",
+      fix: "使用 range(index, size - 1) 搬移索引 1 到 2；然后 size -= 1，并把 items[size] 清为 None，维持有效区与空闲区边界",
+      result: "底层槽位变为 ['A', 'C', 'D', None]，逻辑 size 为 3，有效元素是 ['A', 'C', 'D']",
+      explanation: "删除后需要搬移的源索引最大是 size-1，所以目标索引最大只能是 size-2。容量没有随逻辑删除自动减小。"
+    },
+    explanationChallenge: "为什么 Python list 的 append 通常很快，却不能说每一次 append 都是严格 O(1)？",
+    referenceAnswer: "Python list 使用动态数组思想，size 小于 capacity 时，append 只需把新对象引用写入下一个空槽位，因此通常是 O(1)。当容量用尽时，需要申请更大的连续槽位并复制已有引用，单次成本会达到 O(n)。扩容预留额外容量，使昂贵复制只在少数操作发生；分析一长串追加的总成本，每次平均为摊还 O(1)。因此必须同时说明常见路径、单次最坏情况和摊还口径。",
+    explanationHint: "建议提到：size、capacity、扩容、复制、单次最坏、操作序列、摊还……",
+    evaluationGroups: [
+      ["size", "长度"],
+      ["capacity", "容量"],
+      ["扩容", "新空间"],
+      ["复制", "搬移"],
+      ["最坏", "O(n)"],
+      ["摊还", "操作序列"]
+    ],
+    codeChallenge: {
+      id: "dynamic-array-append",
+      title: "真实代码验收 · 从零模拟动态数组追加",
+      brief: "实现 build_dynamic_array(values)。初始 capacity=1；容量满时严格翻倍，并逐项复制有效元素。返回 data、size、capacity、copies，其中 data 只包含有效元素，copies 是历次扩容复制旧元素的总次数。",
+      starter: `def build_dynamic_array(values):\n    capacity = 1\n    size = 0\n    copies = 0\n    data = [None] * capacity\n    # 不要使用 list.append；手动扩容、复制和写入\n    return {\"data\": data[:size], \"size\": size, \"capacity\": capacity, \"copies\": copies}`,
+      checks: ["三个元素触发两次扩容", "空输入", "单元素不扩容（隐藏）", "五个元素触发三次扩容（隐藏）"]
+    }
   }
 ];

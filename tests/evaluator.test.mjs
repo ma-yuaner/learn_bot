@@ -98,3 +98,27 @@ def linear_search_with_count(items, target):
   assert.equal(result.results.length, 4);
   assert.ok(result.results.every((item) => item.passed));
 });
+
+test("动态数组挑战验证倍增容量与历次复制成本", () => {
+  const result = evaluate(`
+def build_dynamic_array(values):
+    capacity = 1
+    size = 0
+    copies = 0
+    data = [None] * capacity
+    for value in values:
+        if size == capacity:
+            new_data = [None] * (capacity * 2)
+            for index in range(size):
+                new_data[index] = data[index]
+                copies = copies + 1
+            data = new_data
+            capacity = capacity * 2
+        data[size] = value
+        size = size + 1
+    return {"data": data[:size], "size": size, "capacity": capacity, "copies": copies}
+  `.trim(), "dynamic-array-append");
+  assert.equal(result.ok, true);
+  assert.equal(result.results.length, 4);
+  assert.ok(result.results.every((item) => item.passed));
+});

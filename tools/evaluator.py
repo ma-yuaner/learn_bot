@@ -41,6 +41,15 @@ CHALLENGES = {
             {"name": "目标在第一项", "args": [[9, 8, 7], 9], "expected": {"index": 0, "checks": 1}, "visible": False},
             {"name": "空列表", "args": [[], 1], "expected": {"index": -1, "checks": 0}, "visible": False},
         ],
+    },
+    "dynamic-array-append": {
+        "function": "build_dynamic_array",
+        "tests": [
+            {"name": "三个元素", "args": [[10, 20, 30]], "expected": {"data": [10, 20, 30], "size": 3, "capacity": 4, "copies": 3}, "visible": True},
+            {"name": "空输入", "args": [[]], "expected": {"data": [], "size": 0, "capacity": 1, "copies": 0}, "visible": True},
+            {"name": "单元素", "args": [["map"]], "expected": {"data": ["map"], "size": 1, "capacity": 1, "copies": 0}, "visible": False},
+            {"name": "五个元素", "args": [[1, 2, 3, 4, 5]], "expected": {"data": [1, 2, 3, 4, 5], "size": 5, "capacity": 8, "copies": 7}, "visible": False},
+        ],
     }
 }
 
@@ -180,6 +189,24 @@ def validate_result(challenge_id, actual):
             and actual["checks"] >= 0
         )
         return valid, "返回值必须包含 index 和 checks 两个整数，且 index 不小于 -1、checks 非负"
+
+    if challenge_id == "dynamic-array-append":
+        valid = (
+            isinstance(actual, dict)
+            and set(actual) == {"data", "size", "capacity", "copies"}
+            and isinstance(actual["data"], list)
+            and len(actual["data"]) <= 100
+            and isinstance(actual["size"], int)
+            and not isinstance(actual["size"], bool)
+            and actual["size"] == len(actual["data"])
+            and isinstance(actual["capacity"], int)
+            and not isinstance(actual["capacity"], bool)
+            and actual["capacity"] >= max(1, actual["size"])
+            and isinstance(actual["copies"], int)
+            and not isinstance(actual["copies"], bool)
+            and actual["copies"] >= 0
+        )
+        return valid, "返回值必须包含 data、size、capacity、copies，且满足 size=len(data)≤capacity、capacity≥1、copies 非负"
 
     valid = (
         isinstance(actual, dict)

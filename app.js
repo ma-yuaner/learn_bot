@@ -363,6 +363,23 @@ function renderWorkbench(kind) {
     return;
   }
 
+  if (kind === "dynamic-array") {
+    controls.innerHTML = `
+      <label>有效元素（逗号分隔）<input id="array-items-input" value="map,torch,rope" /></label>
+      <label>当前底层容量 capacity<input id="array-capacity-input" type="number" value="4" min="1" max="32" /></label>
+      <label>操作
+        <select id="array-operation-input">
+          <option value="append">尾部追加 append</option>
+          <option value="insert" selected>指定位置插入 insert</option>
+        </select>
+      </label>
+      <label>新元素 value<input id="array-value-input" value="water" maxlength="30" /></label>
+      <label>插入索引 index<input id="array-index-input" type="number" value="1" min="0" max="30" /></label>
+      <button class="primary-button" id="run-workbench">执行动态数组操作 <span>▶</span></button>
+    `;
+    return;
+  }
+
   controls.innerHTML = `
     <label>物品文本（逗号分隔）<input id="items-input" value="torch,map,torch,rope" /></label>
     <label>查找目标 target<input id="target-input" value="torch" maxlength="20" /></label>
@@ -735,6 +752,33 @@ function runWorkbench() {
       return `<div class="trace-row"><span>${model.label}</span><b>${count} 次 · ${width}% 相对长度</b></div>`;
     }).join("");
     trace += `<div class="trace-row"><span>分析口径</span><b>用基本操作近似最坏情况；不是实际毫秒数</b></div>`;
+  } else if (lesson.lab.kind === "dynamic-array") {
+    const items = document.querySelector("#array-items-input").value
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+    const requestedCapacity = Math.max(1, Math.min(32, Math.floor(Number(document.querySelector("#array-capacity-input").value) || 1)));
+    const capacity = Math.max(requestedCapacity, items.length);
+    const operation = document.querySelector("#array-operation-input").value;
+    const value = document.querySelector("#array-value-input").value.trim() || "new-item";
+    const requestedIndex = Math.floor(Number(document.querySelector("#array-index-input").value) || 0);
+    const index = operation === "append" ? items.length : Math.max(0, Math.min(items.length, requestedIndex));
+    const expanded = items.length === capacity;
+    const nextCapacity = expanded ? Math.max(1, capacity * 2) : capacity;
+    const resizeCopies = expanded ? items.length : 0;
+    const shifts = items.length - index;
+    const before = [...items];
+    items.splice(index, 0, value);
+    const slots = [...items, ...Array(nextCapacity - items.length).fill("∅")];
+    output = `操作前：size=${before.length}, capacity=${capacity}\n操作后：size=${items.length}, capacity=${nextCapacity}\n扩容复制：${resizeCopies} 次\n插入搬移：${shifts} 次\n有效元素：${JSON.stringify(items)}`;
+    trace = `
+      <div class="trace-row"><span>操作前有效区</span><b>${escapeHtml(JSON.stringify(before))}</b></div>
+      <div class="trace-row"><span>容量检查</span><b>${before.length} ${expanded ? "==" : "<"} ${capacity} → ${expanded ? `扩容到 ${nextCapacity}` : "复用空闲槽位"}</b></div>
+      <div class="trace-row"><span>扩容成本</span><b>复制 ${resizeCopies} 个已有引用</b></div>
+      <div class="trace-row"><span>插入方向</span><b>索引 ${index} 后方 ${shifts} 项从后向前搬移</b></div>
+      <div class="trace-row"><span>底层槽位</span><b>${escapeHtml(JSON.stringify(slots))}</b></div>
+      <div class="trace-row"><span>复杂度结论</span><b>${operation === "append" && !expanded ? "本次 O(1)" : "本次 O(n)"}；连续 append 为摊还 O(1)</b></div>
+    `;
   } else {
     const change = document.querySelector("#change-input").value;
     const tested = document.querySelector("#tests-input").checked;

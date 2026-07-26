@@ -76,11 +76,11 @@ test("多区域课程目录将已开放区域映射到独立关卡", () => {
   assert.equal(lessonCatalog.python, pythonLessons);
   assert.equal(lessonCatalog.algorithm, dataStructureLessons);
   assert.equal(tracks.find((track) => track.id === "algorithm").available, true);
-  assert.equal(dataStructureLessons.length, 1);
+  assert.equal(dataStructureLessons.length, 2);
 });
 
 test("数据结构 DS01 具备学习、实验、诊断、表达与代码验收闭环", () => {
-  const lesson = dataStructureLessons[0];
+  const lesson = dataStructureLessons.find((item) => item.id === "ds-complexity");
   assert.equal(lesson.id, "ds-complexity");
   assert.equal(lesson.trackId, "algorithm");
   assert.equal(lesson.objectives.length, 4);
@@ -95,6 +95,25 @@ test("数据结构 DS01 具备学习、实验、诊断、表达与代码验收�
   assert.ok(lesson.referenceAnswer.length >= 80);
   assert.equal(lesson.codeChallenge.id, "linear-search-count");
   assert.match(lesson.codeChallenge.starter, /^def linear_search_with_count/);
+});
+
+test("数据结构 DS02 覆盖动态数组内部机制与摊还分析", () => {
+  const lesson = dataStructureLessons.find((item) => item.id === "ds-dynamic-array");
+  assert.ok(lesson);
+  assert.equal(lesson.trackId, "algorithm");
+  assert.equal(lesson.objectives.length, 4);
+  assert.ok(lesson.concepts.some((item) => item.term.includes("capacity")));
+  assert.ok(lesson.concepts.some((item) => item.term.includes("摊还")));
+  assert.ok(lesson.types.some((row) => row[0] === "append"));
+  assert.ok(lesson.prediction.choices.includes(lesson.prediction.answer));
+  assert.equal(lesson.lab.kind, "dynamic-array");
+  assert.ok(lesson.debugChallenge.choices[lesson.debugChallenge.answer]);
+  assert.match(lesson.debugChallenge.error, /IndexError/);
+  assert.ok(lesson.quiz.length >= 4);
+  assert.ok(lesson.evaluationGroups.length >= 6);
+  assert.ok(lesson.referenceAnswer.length >= 100);
+  assert.equal(lesson.codeChallenge.id, "dynamic-array-append");
+  assert.match(lesson.codeChallenge.starter, /^def build_dynamic_array/);
 });
 
 test("Python 平原覆盖培训讲义后半程关键主题", () => {
