@@ -48,7 +48,7 @@ npm test
 - 全知识面覆盖矩阵与统一完成标准
 - GitHub Actions 持续集成
 
-详细设计见 [docs/learning-design.md](docs/learning-design.md)，开发覆盖情况见 [docs/coverage-matrix.md](docs/coverage-matrix.md)，平台能力规划见 [docs/product-roadmap.md](docs/product-roadmap.md)，手机与同步学习路线见 [docs/mobile-sync-architecture.md](docs/mobile-sync-architecture.md)，数据结构专项见 [docs/data-structures-roadmap.md](docs/data-structures-roadmap.md)，架构与全局工具选择见 [docs/architecture-decisions-roadmap.md](docs/architecture-decisions-roadmap.md)。
+详细设计见 [docs/learning-design.md](docs/learning-design.md)，开发覆盖情况见 [docs/coverage-matrix.md](docs/coverage-matrix.md)，平台能力规划见 [docs/product-roadmap.md](docs/product-roadmap.md)，手机与同步学习路线见 [docs/mobile-sync-architecture.md](docs/mobile-sync-architecture.md)，数据结构专项见 [docs/data-structures-roadmap.md](docs/data-structures-roadmap.md)，架构与全局工具选择见 [docs/architecture-decisions-roadmap.md](docs/architecture-decisions-roadmap.md)，SlopWatch 与开源工具实战见 [docs/open-source-project-labs.md](docs/open-source-project-labs.md)。
 
 ## 内容原则
 

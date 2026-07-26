@@ -1,21 +1,17 @@
 import { assessmentLevels, lessonCatalog, tracks } from "./data/curriculum.js";
 import { simulateExpedition } from "./lib/expedition.js";
+import {
+  blankLessonProgress,
+  graduationReadiness,
+  lessonCheckpoints,
+  lessonLearningState,
+  missingCheckpointLabels
+} from "./lib/progress.js";
 
 const storageKey = "ai-explorer-progress-v2";
 const legacyStorageKey = "ai-explorer-progress-v1";
 const defaultTrackId = "python";
 const allLessons = Object.values(lessonCatalog).flat();
-const blankLessonProgress = () => ({
-  concept: false,
-  prediction: false,
-  workshop: false,
-  debug: false,
-  quiz: 0,
-  explanation: 0,
-  project: false,
-  code: false
-});
-
 let state = loadState();
 
 function loadState() {
@@ -108,13 +104,23 @@ function renderStaticContent() {
 function renderLessonSwitcher() {
   document.querySelector("#lesson-switcher").innerHTML = currentTrackLessons().map((lesson, index) => {
     const progress = state.lessons[lesson.id] || blankLessonProgress();
-    const lessonPassed = progress.quiz >= 80 && progress.explanation >= 60 && progress.debug;
-    const projectPassed = !lesson.moduleProject || progress.project;
-    const codePassed = !lesson.codeChallenge || progress.code;
-    const passed = lessonPassed && projectPassed && codePassed;
+    const learningState = lessonLearningState(lesson, progress);
+    const statusLabel = {
+      not_started: "待学习",
+      in_progress: "进行中",
+      passed: "已通过"
+    }[learningState];
+    const shortTitle = lesson.title.replace(/^.*? · /, "");
+    const missing = missingCheckpointLabels(lesson, progress);
     return `
-      <button class="${lesson.id === state.activeLessonId ? "active" : ""}" data-lesson="${lesson.id}">
-        <span>${String(index + 1).padStart(2, "0")}</span>${passed ? "已通过" : "学习"}
+      <button
+        class="${lesson.id === state.activeLessonId ? "active" : ""} ${learningState}"
+        data-lesson="${lesson.id}"
+        title="${escapeHtml(missing.length ? `尚缺：${missing.join("、")}` : "本关全部检查点已完成")}"
+      >
+        <span class="lesson-number">${String(index + 1).padStart(2, "0")}</span>
+        <span class="lesson-switch-title">${escapeHtml(shortTitle)}</span>
+        <small>${statusLabel}${missing.length ? ` · 缺 ${missing.length} 项` : ""}</small>
       </button>
     `;
   }).join("");
@@ -210,10 +216,17 @@ function renderGraduation(lesson) {
   const section = document.querySelector("#graduation-section");
   section.hidden = !lesson.graduation;
   if (!lesson.graduation) return;
-  document.querySelector("#graduation-title").textContent = lesson.graduation.title;
+  const readiness = graduationReadiness(currentTrackLessons(), state.lessons, lesson.id);
+  section.classList.toggle("locked", !readiness.unlocked);
+  document.querySelector("#graduation-title").textContent = readiness.unlocked
+    ? `${lesson.graduation.title} · 已解锁`
+    : `${lesson.graduation.title} · 未解锁`;
   document.querySelector("#graduation-requirements").innerHTML = lesson.graduation.requirements
     .map((item) => `<li>${item}</li>`)
     .join("");
+  document.querySelector("#graduation-note").textContent = readiness.unlocked
+    ? "前置关卡已全部通过。此考核仍须结合代码仓库、自动测试和人工追问完成，页面自评不能直接点亮毕业状态。"
+    : `还需通过前面的 ${readiness.missingLessons.length} 个关卡才能解锁正式考核。要求可提前预览，但当前不能视为已毕业。`;
 }
 
 function renderWorkbench(kind) {
@@ -433,19 +446,12 @@ function masteryScores(progress) {
 
 function renderProgress() {
   const progress = currentProgress();
+  const lesson = currentLesson();
   const dimensions = masteryScores(progress);
   const total = Math.round(Object.values(dimensions).reduce((sum, value) => sum + value, 0) / Object.keys(dimensions).length);
-  const checkpointStates = [
-    progress.concept,
-    progress.prediction,
-    progress.workshop,
-    progress.debug,
-    progress.quiz >= 80 && progress.explanation >= 60
-  ];
-  if (currentLesson().moduleProject) checkpointStates.push(progress.project);
-  if (currentLesson().codeChallenge) checkpointStates.push(progress.code);
-  const completed = checkpointStates.filter(Boolean).length;
-  const checkpointTotal = checkpointStates.length;
+  const checkpoints = lessonCheckpoints(lesson, progress);
+  const completed = checkpoints.filter((checkpoint) => checkpoint.passed).length;
+  const checkpointTotal = checkpoints.length;
   const allScores = allLessons.map((lesson) => {
     const item = state.lessons[lesson.id] || blankLessonProgress();
     return Object.values(masteryScores(item)).reduce((sum, value) => sum + value, 0) / 5;
@@ -462,6 +468,7 @@ function renderProgress() {
   document.querySelector("#xp-label").textContent = `${xp} XP`;
   document.querySelector("#level-number").textContent = String(Math.max(1, Math.ceil(xp / 250))).padStart(2, "0");
   document.querySelector('[data-checkpoint="concept"]').checked = progress.concept;
+  if (lesson.graduation) renderGraduation(lesson);
   renderLessonSwitcher();
 }
 

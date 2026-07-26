@@ -81,10 +81,23 @@ button { cursor: pointer; }
 .tag.coral { color: #8d3925; background: #f9d9cf; }
 .card h2 { font: 34px Georgia, "Songti SC", serif; margin: 24px 0 12px; }
 .card > p { color: var(--muted); line-height: 1.7; }
-.lesson-switcher { display: flex; gap: 7px; margin-top: 20px; }
-.lesson-switcher button { border: 1px solid var(--line); background: transparent; padding: 8px 11px; color: var(--muted); font-size: 11px; }
-.lesson-switcher button span { font-family: Georgia, serif; margin-right: 7px; }
+.lesson-switcher { display: flex; gap: 7px; margin-top: 20px; overflow-x: auto; padding-bottom: 6px; }
+.lesson-switcher button {
+  border: 1px solid var(--line); background: transparent; padding: 8px 11px; color: var(--muted);
+  font-size: 11px; display: grid; grid-template-columns: auto minmax(92px, 1fr); gap: 2px 8px;
+  text-align: left; flex: 0 0 auto; min-width: 170px;
+}
+.lesson-switcher .lesson-number { grid-row: 1 / 3; align-self: center; font: 19px Georgia, serif; color: var(--ink); }
+.lesson-switch-title { color: var(--ink); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lesson-switcher button small { color: var(--muted); }
+.lesson-switcher button.in_progress { border-color: var(--gold); background: rgba(208, 163, 74, .08); }
+.lesson-switcher button.passed { border-color: var(--green); }
 .lesson-switcher button.active { color: white; background: var(--ink); border-color: var(--ink); }
+.lesson-switcher button.active .lesson-number,
+.lesson-switcher button.active .lesson-switch-title { color: white; }
+.lesson-switcher button.active small { color: rgba(255,255,255,.68); }
+.graduation-section.locked .objective-panel { opacity: .62; filter: grayscale(.3); }
+.graduation-section.locked .graduation-note { color: var(--coral); }
 .mission-progress { height: 7px; background: #dddcd2; margin: 28px 0 12px; }
 .mission-meta { display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-size: 12px; }
 .primary-button, .secondary-button { border: 0; padding: 12px 17px; font-weight: 700; }
