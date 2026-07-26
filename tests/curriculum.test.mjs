@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   assessmentLevels,
+  databaseLessons,
   dataStructureLessons,
   firstLesson,
   lessonCatalog,
@@ -75,8 +76,25 @@ test("每个 Python 关卡都符合可复用课程协议", () => {
 test("多区域课程目录将已开放区域映射到独立关卡", () => {
   assert.equal(lessonCatalog.python, pythonLessons);
   assert.equal(lessonCatalog.algorithm, dataStructureLessons);
+  assert.equal(lessonCatalog.database, databaseLessons);
   assert.equal(tracks.find((track) => track.id === "algorithm").available, true);
+  assert.equal(tracks.find((track) => track.id === "database").available, true);
   assert.equal(dataStructureLessons.length, 16);
+});
+
+test("数据库 DB01 覆盖关系模型、约束、实验和解释评估", () => {
+  assert.equal(databaseLessons.length, 1);
+  const lesson = databaseLessons[0];
+  assert.equal(lesson.id, "db-relational-model");
+  assert.equal(lesson.trackId, "database");
+  assert.equal(lesson.objectives.length, 4);
+  assert.ok(lesson.concepts.some((item) => item.term === "主键"));
+  assert.ok(lesson.types.some((row) => row[0] === "DECIMAL"));
+  assert.equal(lesson.lab.kind, "relational-model");
+  assert.ok(lesson.prediction.choices.includes(lesson.prediction.answer));
+  assert.ok(lesson.debugChallenge.choices[lesson.debugChallenge.answer]);
+  assert.ok(lesson.quiz.length >= 4);
+  assert.ok(lesson.referenceAnswer.length >= 120);
 });
 
 test("数据结构 DS01 具备学习、实验、诊断、表达与代码验收闭环", () => {

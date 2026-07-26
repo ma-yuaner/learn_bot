@@ -1,5 +1,6 @@
 import { advancedPythonLessons } from "./python-advanced.js";
 import { dataStructureLessons } from "./data-structures.js";
+import { databaseLessons } from "./database-lessons.js";
 
 export const tracks = [
   {
@@ -50,7 +51,8 @@ export const tracks = [
     title: "数据矿井",
     source: "MySQL",
     description: "从表、行、列理解持久化数据，再学习查询、约束、事务与索引。",
-    chapters: ["数据库与关系模型", "SQL 基础", "条件与聚合", "多表查询", "约束", "事务", "索引", "数据库设计"]
+    chapters: ["数据库与关系模型", "SQL 基础", "条件与聚合", "多表查询", "约束", "事务", "索引", "数据库设计"],
+    available: true
   },
   {
     id: "data",
@@ -891,10 +893,12 @@ export const pythonLessons = [
 ];
 
 export { dataStructureLessons };
+export { databaseLessons };
 
 export const lessonCatalog = {
   python: pythonLessons,
-  algorithm: dataStructureLessons
+  algorithm: dataStructureLessons,
+  database: databaseLessons
 };
 
 export const assessmentLevels = [

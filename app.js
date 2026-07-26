@@ -426,6 +426,19 @@ function renderWorkbench(kind) {
     return;
   }
 
+  if (kind === "relational-model") {
+    controls.innerHTML = `
+      <label>表名<input id="relation-table-input" value="learners" maxlength="30" /></label>
+      <label>列定义（名称:类型，! 表示非空）<input id="relation-columns-input" value="id:BIGINT!,name:VARCHAR!,score:INT" /></label>
+      <label>主键列<input id="relation-primary-key-input" value="id" maxlength="30" /></label>
+      <label>样例行（每行一条，逗号分隔）<textarea id="relation-rows-input" rows="5">1,小码,88
+2,小智,95
+2,小新,</textarea></label>
+      <button class="primary-button" id="run-workbench">检查关系模式 <span>▶</span></button>
+    `;
+    return;
+  }
+
   controls.innerHTML = `
     <label>物品文本（逗号分隔）<input id="items-input" value="torch,map,torch,rope" /></label>
     <label>查找目标 target<input id="target-input" value="torch" maxlength="20" /></label>
@@ -1294,6 +1307,47 @@ function runWorkbench() {
     trace = `${steps.slice(0, 18).map((step, index) => `<div class="trace-row"><span>轨迹 ${index + 1}</span><b>${escapeHtml(step)}</b></div>`).join("")}
       <div class="trace-row"><span>复杂度结论</span><b>${escapeHtml(complexity)}</b></div>
       <div class="trace-row"><span>验证口径</span><b>同时检查正常、空输入、边界与最坏结构</b></div>
+    `;
+  } else if (lesson.lab.kind === "relational-model") {
+    const tableName = document.querySelector("#relation-table-input").value.trim() || "unnamed_table";
+    const columns = document.querySelector("#relation-columns-input").value.split(",").map((item) => item.trim()).filter(Boolean)
+      .map((definition) => {
+        const [name, rawType = "TEXT"] = definition.split(":");
+        return { name: name.trim(), type: rawType.replace("!", "").trim().toUpperCase(), required: rawType.includes("!") };
+      });
+    const primaryKey = document.querySelector("#relation-primary-key-input").value.trim();
+    const rawRows = document.querySelector("#relation-rows-input").value.split(/\r?\n/).filter((line) => line.trim());
+    const seenKeys = new Set();
+    const errors = [];
+    const rowTraces = [];
+    rawRows.forEach((line, rowIndex) => {
+      const values = line.split(",").map((item) => item.trim());
+      if (values.length !== columns.length) {
+        errors.push(`第 ${rowIndex + 1} 行列数 ${values.length}，期望 ${columns.length}`);
+        rowTraces.push(`第 ${rowIndex + 1} 行：列数错误`);
+        return;
+      }
+      columns.forEach((column, columnIndex) => {
+        if (column.required && values[columnIndex] === "") errors.push(`第 ${rowIndex + 1} 行 ${column.name} 违反 NOT NULL`);
+      });
+      const keyIndex = columns.findIndex((column) => column.name === primaryKey);
+      if (keyIndex < 0) errors.push(`主键列 ${primaryKey} 不存在`);
+      else {
+        const key = values[keyIndex];
+        if (!key) errors.push(`第 ${rowIndex + 1} 行主键为空`);
+        else if (seenKeys.has(key)) errors.push(`第 ${rowIndex + 1} 行主键 ${key} 重复`);
+        else seenKeys.add(key);
+      }
+      rowTraces.push(`第 ${rowIndex + 1} 行：${values.map((value) => value || "NULL").join(" | ")}`);
+    });
+    const schema = columns.map((column) =>
+      `${column.name} ${column.type}${column.required ? " NOT NULL" : ""}${column.name === primaryKey ? " PRIMARY KEY" : ""}`
+    );
+    output = `表：${tableName}\n模式：\n  ${schema.join("\n  ")}\n样例行：${rawRows.length}\n检查结果：${errors.length ? `${errors.length} 个问题` : "约束全部通过"}\n${errors.join("\n")}`;
+    trace = `${rowTraces.map((item, index) => `<div class="trace-row"><span>记录 ${index + 1}</span><b>${escapeHtml(item)}</b></div>`).join("")}
+      <div class="trace-row"><span>身份约束</span><b>PRIMARY KEY ${escapeHtml(primaryKey)}：唯一且非空</b></div>
+      <div class="trace-row"><span>NULL 口径</span><b>空单元格表示未知/不适用，不等于 0 或空字符串业务值</b></div>
+      <div class="trace-row"><span>最终结论</span><b>${errors.length ? escapeHtml(errors.join("；")) : "模式与样例数据一致"}</b></div>
     `;
   } else {
     const change = document.querySelector("#change-input").value;
