@@ -76,7 +76,7 @@ test("多区域课程目录将已开放区域映射到独立关卡", () => {
   assert.equal(lessonCatalog.python, pythonLessons);
   assert.equal(lessonCatalog.algorithm, dataStructureLessons);
   assert.equal(tracks.find((track) => track.id === "algorithm").available, true);
-  assert.equal(dataStructureLessons.length, 2);
+  assert.equal(dataStructureLessons.length, 3);
 });
 
 test("数据结构 DS01 具备学习、实验、诊断、表达与代码验收闭环", () => {
@@ -114,6 +114,25 @@ test("数据结构 DS02 覆盖动态数组内部机制与摊还分析", () => {
   assert.ok(lesson.referenceAnswer.length >= 100);
   assert.equal(lesson.codeChallenge.id, "dynamic-array-append");
   assert.match(lesson.codeChallenge.starter, /^def build_dynamic_array/);
+});
+
+test("数据结构 DS03 覆盖链表改线、反转和环检测", () => {
+  const lesson = dataStructureLessons.find((item) => item.id === "ds-linked-list");
+  assert.ok(lesson);
+  assert.equal(lesson.trackId, "algorithm");
+  assert.equal(lesson.objectives.length, 4);
+  assert.ok(lesson.concepts.some((item) => item.term.includes("head")));
+  assert.ok(lesson.concepts.some((item) => item.term.includes("反转")));
+  assert.ok(lesson.types.some((row) => row[0] === "反转/环检测"));
+  assert.ok(lesson.prediction.choices.includes(lesson.prediction.answer));
+  assert.equal(lesson.lab.kind, "linked-list");
+  assert.ok(lesson.debugChallenge.choices[lesson.debugChallenge.answer]);
+  assert.match(lesson.debugChallenge.error, /断链/);
+  assert.ok(lesson.quiz.length >= 4);
+  assert.ok(lesson.evaluationGroups.length >= 7);
+  assert.ok(lesson.referenceAnswer.length >= 120);
+  assert.equal(lesson.codeChallenge.id, "reverse-index-chain");
+  assert.match(lesson.codeChallenge.starter, /^def reverse_index_chain/);
 });
 
 test("Python 平原覆盖培训讲义后半程关键主题", () => {

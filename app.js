@@ -380,6 +380,24 @@ function renderWorkbench(kind) {
     return;
   }
 
+  if (kind === "linked-list") {
+    controls.innerHTML = `
+      <label>节点值（逗号分隔）<input id="linked-values-input" value="A,B,C,D" /></label>
+      <label>指针操作
+        <select id="linked-operation-input">
+          <option value="insert">在指定节点后插入</option>
+          <option value="delete">删除指定位置节点</option>
+          <option value="reverse" selected>反转整条链</option>
+          <option value="cycle">尾节点成环并检测</option>
+        </select>
+      </label>
+      <label>位置 index<input id="linked-index-input" type="number" value="1" min="0" max="30" /></label>
+      <label>新节点值（插入时使用）<input id="linked-new-value-input" value="X" maxlength="30" /></label>
+      <button class="primary-button" id="run-workbench">执行指针改线 <span>▶</span></button>
+    `;
+    return;
+  }
+
   controls.innerHTML = `
     <label>物品文本（逗号分隔）<input id="items-input" value="torch,map,torch,rope" /></label>
     <label>查找目标 target<input id="target-input" value="torch" maxlength="20" /></label>
@@ -778,6 +796,106 @@ function runWorkbench() {
       <div class="trace-row"><span>插入方向</span><b>索引 ${index} 后方 ${shifts} 项从后向前搬移</b></div>
       <div class="trace-row"><span>底层槽位</span><b>${escapeHtml(JSON.stringify(slots))}</b></div>
       <div class="trace-row"><span>复杂度结论</span><b>${operation === "append" && !expanded ? "本次 O(1)" : "本次 O(n)"}；连续 append 为摊还 O(1)</b></div>
+    `;
+  } else if (lesson.lab.kind === "linked-list") {
+    const values = document.querySelector("#linked-values-input").value
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .slice(0, 20);
+    const operation = document.querySelector("#linked-operation-input").value;
+    const requestedIndex = Math.floor(Number(document.querySelector("#linked-index-input").value) || 0);
+    const newValue = document.querySelector("#linked-new-value-input").value.trim() || "X";
+    const nodes = values.map((value, index) => ({
+      id: index,
+      value,
+      next: index + 1 < values.length ? index + 1 : -1,
+      removed: false
+    }));
+    let head = nodes.length ? 0 : -1;
+    let tail = nodes.length ? nodes.length - 1 : -1;
+    const steps = [];
+    let detectedCycle = false;
+
+    if (operation === "insert") {
+      if (head === -1) {
+        nodes.push({ id: 0, value: newValue, next: -1, removed: false });
+        head = 0;
+        tail = 0;
+        steps.push("空链：head 和 tail 同时指向新节点 n0");
+      } else {
+        const index = Math.max(0, Math.min(nodes.length - 1, requestedIndex));
+        const oldNext = nodes[index].next;
+        const newId = nodes.length;
+        nodes.push({ id: newId, value: newValue, next: oldNext, removed: false });
+        nodes[index].next = newId;
+        if (tail === index) tail = newId;
+        steps.push(`先保存 n${index}.next = ${oldNext === -1 ? "None" : `n${oldNext}`}`);
+        steps.push(`令 n${newId}.next 指向旧后继，再令 n${index}.next 指向 n${newId}`);
+      }
+    } else if (operation === "delete" && head !== -1) {
+      const index = Math.max(0, Math.min(nodes.length - 1, requestedIndex));
+      if (index === head) {
+        head = nodes[index].next;
+        if (tail === index) tail = head;
+        steps.push(`删除 head：先把 head 推进到 ${head === -1 ? "None" : `n${head}`}`);
+      } else {
+        let previous = head;
+        while (previous !== -1 && nodes[previous].next !== index) previous = nodes[previous].next;
+        if (previous !== -1) {
+          nodes[previous].next = nodes[index].next;
+          if (tail === index) tail = previous;
+          steps.push(`找到前驱 n${previous}，令它越过 n${index} 指向 ${nodes[index].next === -1 ? "None" : `n${nodes[index].next}`}`);
+        }
+      }
+      nodes[index].removed = true;
+      nodes[index].next = -1;
+    } else if (operation === "reverse") {
+      const oldHead = head;
+      let previous = -1;
+      let current = head;
+      while (current !== -1) {
+        const nextNode = nodes[current].next;
+        nodes[current].next = previous;
+        steps.push(`保存 ${nextNode === -1 ? "None" : `n${nextNode}`}；n${current}.next → ${previous === -1 ? "None" : `n${previous}`}`);
+        previous = current;
+        current = nextNode;
+      }
+      head = previous;
+      tail = oldHead;
+    } else if (operation === "cycle" && tail !== -1) {
+      const target = Math.max(0, Math.min(nodes.length - 1, requestedIndex));
+      nodes[tail].next = target;
+      steps.push(`令 tail n${tail}.next → n${target}，链不再以 None 结束`);
+      let slow = head;
+      let fast = head;
+      for (let round = 1; round <= nodes.length + 1 && fast !== -1 && nodes[fast].next !== -1; round += 1) {
+        slow = nodes[slow].next;
+        fast = nodes[nodes[fast].next].next;
+        steps.push(`第 ${round} 轮：slow=${slow === -1 ? "None" : `n${slow}`}，fast=${fast === -1 ? "None" : `n${fast}`}`);
+        if (slow === fast) {
+          detectedCycle = true;
+          break;
+        }
+      }
+    }
+
+    const order = [];
+    const seen = new Set();
+    let cursor = head;
+    while (cursor !== -1 && !seen.has(cursor)) {
+      seen.add(cursor);
+      order.push(cursor);
+      cursor = nodes[cursor].next;
+    }
+    const diagram = order.map((id) => `n${id}(${nodes[id].value})`).join(" → ")
+      + (cursor === -1 ? " → None" : ` → n${cursor} ↺`);
+    const activeCount = nodes.filter((node) => !node.removed).length;
+    output = `head=${head === -1 ? "None" : `n${head}`}, tail=${tail === -1 ? "None" : `n${tail}`}\n${diagram || "空链 None"}\n可达节点：${order.length}；有效节点：${activeCount}\n${operation === "cycle" ? `检测结果：${detectedCycle ? "存在环" : "未发现环"}` : "结构：无环单链表"}`;
+    trace = `${steps.map((step, index) => `<div class="trace-row"><span>步骤 ${index + 1}</span><b>${escapeHtml(step)}</b></div>`).join("")}
+      <div class="trace-row"><span>节点身份</span><b>${escapeHtml(nodes.filter((node) => !node.removed).map((node) => `n${node.id}:${node.value}`).join("；") || "无")}</b></div>
+      <div class="trace-row"><span>不变量检查</span><b>${operation === "cycle" ? "故意破坏 tail.next=None，用快慢指针取证" : `size=${activeCount}，从 head 可达 ${order.length} 个节点`}</b></div>
+      <div class="trace-row"><span>复杂度</span><b>${operation === "insert" ? "已知节点后插入 O(1)；按索引定位仍为 O(n)" : "本操作需要遍历，O(n) 时间"}</b></div>
     `;
   } else {
     const change = document.querySelector("#change-input").value;

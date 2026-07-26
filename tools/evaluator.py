@@ -50,6 +50,15 @@ CHALLENGES = {
             {"name": "单元素", "args": [["map"]], "expected": {"data": ["map"], "size": 1, "capacity": 1, "copies": 0}, "visible": False},
             {"name": "五个元素", "args": [[1, 2, 3, 4, 5]], "expected": {"data": [1, 2, 3, 4, 5], "size": 5, "capacity": 8, "copies": 7}, "visible": False},
         ],
+    },
+    "reverse-index-chain": {
+        "function": "reverse_index_chain",
+        "tests": [
+            {"name": "三节点完整链", "args": [[1, 2, -1], 0], "expected": {"head": 2, "next": [-1, 0, 1], "order": [2, 1, 0]}, "visible": True},
+            {"name": "空链", "args": [[], -1], "expected": {"head": -1, "next": [], "order": []}, "visible": True},
+            {"name": "单节点", "args": [[-1], 0], "expected": {"head": 0, "next": [-1], "order": [0]}, "visible": False},
+            {"name": "非零头与不可达节点", "args": [[-1, 3, -1, -1], 1], "expected": {"head": 3, "next": [-1, -1, -1, 1], "order": [3, 1]}, "visible": False},
+        ],
     }
 }
 
@@ -207,6 +216,33 @@ def validate_result(challenge_id, actual):
             and actual["copies"] >= 0
         )
         return valid, "返回值必须包含 data、size、capacity、copies，且满足 size=len(data)≤capacity、capacity≥1、copies 非负"
+
+    if challenge_id == "reverse-index-chain":
+        valid = (
+            isinstance(actual, dict)
+            and set(actual) == {"head", "next", "order"}
+            and isinstance(actual["head"], int)
+            and not isinstance(actual["head"], bool)
+            and isinstance(actual["next"], list)
+            and len(actual["next"]) <= 100
+            and all(
+                isinstance(value, int)
+                and not isinstance(value, bool)
+                and -1 <= value < len(actual["next"])
+                for value in actual["next"]
+            )
+            and -1 <= actual["head"] < len(actual["next"])
+            and isinstance(actual["order"], list)
+            and len(actual["order"]) <= len(actual["next"])
+            and len(set(actual["order"])) == len(actual["order"])
+            and all(
+                isinstance(value, int)
+                and not isinstance(value, bool)
+                and 0 <= value < len(actual["next"])
+                for value in actual["order"]
+            )
+        )
+        return valid, "返回值必须包含合法的 head、next 索引列表和不重复的 order 索引列表"
 
     valid = (
         isinstance(actual, dict)

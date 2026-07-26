@@ -211,5 +211,113 @@ export const dataStructureLessons = [
       starter: `def build_dynamic_array(values):\n    capacity = 1\n    size = 0\n    copies = 0\n    data = [None] * capacity\n    # 不要使用 list.append；手动扩容、复制和写入\n    return {\"data\": data[:size], \"size\": size, \"capacity\": capacity, \"copies\": copies}`,
       checks: ["三个元素触发两次扩容", "空输入", "单元素不扩容（隐藏）", "五个元素触发三次扩容（隐藏）"]
     }
+  },
+  {
+    id: "ds-linked-list",
+    trackId: "algorithm",
+    title: "DS03 · 链表与引用改写",
+    duration: "110–150 分钟",
+    objectives: [
+      "画出节点、数据域、next 引用和 head/tail 指针之间的关系",
+      "推演头部、中间、尾部插入删除，并正确处理空链和单节点边界",
+      "使用三指针反转链表，解释为什么必须先保存 next_node",
+      "使用快慢指针检测环，并比较链表与动态数组的真实取舍"
+    ],
+    concepts: [
+      {
+        term: "节点与引用",
+        detail: "单链表节点保存 value 和 next。节点不要求物理连续，next 保存的是下一个节点的引用；链的顺序由引用关系决定，而不是内存地址大小。"
+      },
+      {
+        term: "head、tail 与不变量",
+        detail: "head 指向首节点，tail 指向尾节点；无环单链表通常满足 tail.next is None。空链时 head 和 tail 都应为空，size 必须等于从 head 可达的节点数。"
+      },
+      {
+        term: "局部改线",
+        detail: "已持有目标位置引用时，插入或删除只需修改少量 next，可为 O(1)；但从 head 查找第 i 个节点仍需 O(n)，不能忽略定位成本。"
+      },
+      {
+        term: "反转与环",
+        detail: "反转会逐个改变边的方向，必须保存尚未处理的后继。环会让普通遍历无法到达 None，可用快慢指针是否相遇在 O(n) 时间、O(1) 额外空间内检测。"
+      }
+    ],
+    types: [
+      ["头部插入", "改 head 和一个 next", "O(1)", "空链时还要同步 tail"],
+      ["已知节点后插入", "改两个 next", "O(1)", "若插到尾部要更新 tail"],
+      ["按索引查找/删除", "先遍历定位", "O(n)", "删除本身改线是 O(1)"],
+      ["反转/环检测", "遍历整条可达链", "O(n)", "可做到 O(1) 额外空间"]
+    ],
+    referenceTitle: "链表不是“更快的列表”",
+    referenceDescription: "链表用引用换取局部改线能力，同时失去连续索引访问和缓存局部性。",
+    prediction: {
+      code: `# A -> B -> C -> None\nnext_index = [1, 2, -1]\nprevious = -1\ncurrent = 0\nwhile current != -1:\n    next_node = next_index[current]\n    next_index[current] = previous\n    previous = current\n    current = next_node\nprint(previous, next_index)`,
+      choices: ["2 [-1, 0, 1]", "0 [1, 2, -1]", "IndexError"],
+      answer: "2 [-1, 0, 1]",
+      explanation: "三轮分别把 A、B、C 的 next 指向前驱；previous 最终为原尾节点 2，也就是新 head，链变为 C→B→A→None。"
+    },
+    quiz: [
+      {
+        question: "为什么链表按索引访问通常是 O(n)？",
+        options: ["节点值不能读取", "没有可直接计算位置的连续槽位，必须从 head 沿 next 前进", "链表只能保存 n 个元素"],
+        answer: 1,
+        reason: "链表顺序编码在 next 引用中，要到第 i 个节点必须经过之前的链接。"
+      },
+      {
+        question: "已拿到节点 current，在它后面插入 new_node 的正确顺序是什么？",
+        options: ["先 current.next=new_node，再读取旧 next", "先 new_node.next=current.next，再 current.next=new_node", "只修改 head"],
+        answer: 1,
+        reason: "必须先让新节点保存旧后继，再把当前节点指向新节点，否则可能丢失后半条链。"
+      },
+      {
+        question: "删除单节点链表的唯一节点后，应满足什么状态？",
+        options: ["head 为空但 tail 保留旧节点", "head、tail 都为空且 size=0", "size 仍为 1"],
+        answer: 1,
+        reason: "空链不变量要求两个端点都为空，且可达节点数与 size 一致。"
+      },
+      {
+        question: "快慢指针为什么能检测环？",
+        options: ["快指针会修改节点", "存在环时两个不同速度的指针最终会在环内相遇", "慢指针总是停在 tail"],
+        answer: 1,
+        reason: "进入环后，快指针相对慢指针每轮接近一步，有限环长下必然相遇。"
+      }
+    ],
+    lab: {
+      kind: "linked-list",
+      title: "链表指针调查台",
+      subtitle: "观察节点身份不变时，next、head 和 tail 如何被重新连接"
+    },
+    debugChallenge: {
+      code: `previous = None\ncurrent = head\nwhile current is not None:\n    current.next = previous\n    previous = current\n    current = current.next\nhead = previous`,
+      question: "为什么这段反转通常只处理第一个节点？",
+      choices: [
+        "previous 不能设为 None",
+        "覆盖 current.next 后再读取它，只会读到 previous，原后继已经丢失",
+        "链表不能使用 while"
+      ],
+      answer: 1,
+      error: "断链：current.next 被改写为 previous 后，原来的下一节点引用已经无法通过 current.next 取得",
+      fix: "每轮先执行 next_node = current.next 保存原后继，再改 current.next = previous，最后依次推进 previous = current、current = next_node",
+      result: "所有边逐条反向，原 tail 成为新 head，原 head 的 next 变为 None，节点没有丢失",
+      explanation: "指针算法的关键不是语句能运行，而是每次改线前确认后续节点仍然可达；应画出修改前后引用图。"
+    },
+    explanationChallenge: "既然链表在已知位置插入是 O(1)，为什么真实项目中不能直接断言链表一定比 Python list 更适合频繁插入？",
+    referenceAnswer: "链表只有在已经持有目标节点引用时，局部插入改线才是 O(1)；如果需求给的是索引或查找条件，定位节点仍可能需要 O(n)。Python list 的中间插入需要搬移引用，是 O(n)，但连续存储具有更好的缓存局部性、额外对象开销更小，并支持 O(1) 随机访问。还要考虑数据规模、插入位置分布、遍历频率、内存开销和标准库实现。因此应从完整操作组合与实际基准选择结构，不能只比较一项理论复杂度。",
+    explanationHint: "建议提到：已知节点、定位成本、连续存储、缓存、内存、访问模式、基准……",
+    evaluationGroups: [
+      ["已知节点", "引用"],
+      ["定位", "查找"],
+      ["O(n)", "线性"],
+      ["连续", "缓存"],
+      ["内存", "对象开销"],
+      ["访问模式", "操作组合"],
+      ["基准", "实际"]
+    ],
+    codeChallenge: {
+      id: "reverse-index-chain",
+      title: "真实代码验收 · 反转索引链表",
+      brief: "实现 reverse_index_chain(next_indices, head)。next_indices[i] 是节点 i 的后继索引，-1 表示 None；输入保证从 head 可达部分无环。请复制列表后只反转可达链，保留不可达节点的原引用，并返回新的 head、next 和从新 head 出发的 order。",
+      starter: `def reverse_index_chain(next_indices, head):\n    links = next_indices[:]\n    previous = -1\n    current = head\n    # 先保存原后继，再改写当前链接\n    return {\"head\": previous, \"next\": links, \"order\": []}`,
+      checks: ["三节点完整链", "空链", "单节点（隐藏）", "非零 head 且含不可达节点（隐藏）"]
+    }
   }
 ];

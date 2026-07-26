@@ -122,3 +122,26 @@ def build_dynamic_array(values):
   assert.equal(result.results.length, 4);
   assert.ok(result.results.every((item) => item.passed));
 });
+
+test("索引链表挑战反转可达节点并保留不可达节点", () => {
+  const result = evaluate(`
+def reverse_index_chain(next_indices, head):
+    links = next_indices[:]
+    previous = -1
+    current = head
+    while current != -1:
+        next_node = links[current]
+        links[current] = previous
+        previous = current
+        current = next_node
+    order = []
+    current = previous
+    while current != -1:
+        order.append(current)
+        current = links[current]
+    return {"head": previous, "next": links, "order": order}
+  `.trim(), "reverse-index-chain");
+  assert.equal(result.ok, true);
+  assert.equal(result.results.length, 4);
+  assert.ok(result.results.every((item) => item.passed));
+});
