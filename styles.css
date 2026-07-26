@@ -74,18 +74,21 @@ button { cursor: pointer; }
 .compass i { width: 40px; height: 70px; background: linear-gradient(155deg, var(--coral) 50%, var(--green) 50%); clip-path: polygon(50% 0, 100% 100%, 50% 78%, 0 100%); transform: rotate(24deg); z-index: 2; }
 .compass b { position: absolute; font-size: 13px; bottom: 10px; }
 
-.dashboard-grid { display: grid; grid-template-columns: 1.55fr .8fr; gap: 18px; }
-.card { background: var(--card); border: 1px solid rgba(255,255,255,.8); box-shadow: var(--shadow); padding: 28px; backdrop-filter: blur(15px); }
+.dashboard-grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, .8fr); gap: 18px; }
+.card { min-width: 0; background: var(--card); border: 1px solid rgba(255,255,255,.8); box-shadow: var(--shadow); padding: 28px; backdrop-filter: blur(15px); }
 .card-head { display: flex; justify-content: space-between; color: var(--muted); font-size: 11px; }
 .tag { display: inline-block; color: var(--green); background: var(--green-soft); padding: 5px 8px; font-size: 10px; font-weight: 800; letter-spacing: .1em; }
 .tag.coral { color: #8d3925; background: #f9d9cf; }
 .card h2 { font: 34px Georgia, "Songti SC", serif; margin: 24px 0 12px; }
 .card > p { color: var(--muted); line-height: 1.7; }
-.lesson-switcher { display: flex; gap: 7px; margin-top: 20px; overflow-x: auto; padding-bottom: 6px; }
+.lesson-switcher {
+  display: flex; gap: 7px; width: 100%; min-width: 0; max-width: 100%; margin-top: 20px;
+  overflow-x: auto; overflow-y: hidden; overscroll-behavior-inline: contain; padding-bottom: 6px;
+}
 .lesson-switcher button {
   border: 1px solid var(--line); background: transparent; padding: 8px 11px; color: var(--muted);
   font-size: 11px; display: grid; grid-template-columns: auto minmax(92px, 1fr); gap: 2px 8px;
-  text-align: left; flex: 0 0 auto; min-width: 170px;
+  text-align: left; flex: 0 0 158px; width: 158px; min-width: 0;
 }
 .lesson-switcher .lesson-number { grid-row: 1 / 3; align-self: center; font: 19px Georgia, serif; color: var(--ink); }
 .lesson-switch-title { color: var(--ink); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -268,5 +271,5 @@ button { cursor: pointer; }
   input, select, textarea { font-size: 16px; }
   .code-editor-panel textarea { min-height: 230px; font-size: 14px; }
   .lesson-switcher { overflow-x: auto; padding-bottom: 5px; }
-  .lesson-switcher button { flex: 0 0 auto; }
+  .lesson-switcher button { flex-basis: 145px; width: 145px; }
 }
