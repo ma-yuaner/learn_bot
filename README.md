@@ -19,6 +19,18 @@ npm run check
 npm test
 ```
 
+## 创建新的项目展示
+
+仓库内包含一个不依赖当前课程数据的通用项目展示空壳：
+
+```bash
+npm run create:showcase -- ./my-project "我的项目"
+cd my-project
+npm run dev
+```
+
+新项目主要填写 `project.config.js` 和 `data/modules.js`，框架会统一渲染项目概览、架构、决策、运行流程、交互实验、理解验收和交付证据。模板说明见 [templates/project-showcase/README.md](templates/project-showcase/README.md)。
+
 ## 当前版本
 
 - 22 个学习区域：11 个培训基础区域与 11 个现代 AI/架构工程补充区域
@@ -49,7 +61,7 @@ npm test
 - 全知识面覆盖矩阵与统一完成标准
 - GitHub Actions 持续集成
 
-详细设计见 [docs/learning-design.md](docs/learning-design.md)，开发覆盖情况见 [docs/coverage-matrix.md](docs/coverage-matrix.md)，平台能力规划见 [docs/product-roadmap.md](docs/product-roadmap.md)，手机与同步学习路线见 [docs/mobile-sync-architecture.md](docs/mobile-sync-architecture.md)，数据结构专项见 [docs/data-structures-roadmap.md](docs/data-structures-roadmap.md)，架构与全局工具选择见 [docs/architecture-decisions-roadmap.md](docs/architecture-decisions-roadmap.md)，SlopWatch 与开源工具实战见 [docs/open-source-project-labs.md](docs/open-source-project-labs.md)。
+详细设计见 [docs/learning-design.md](docs/learning-design.md)，开发覆盖情况见 [docs/coverage-matrix.md](docs/coverage-matrix.md)，平台能力规划见 [docs/product-roadmap.md](docs/product-roadmap.md)，手机与同步学习路线见 [docs/mobile-sync-architecture.md](docs/mobile-sync-architecture.md)，数据结构专项见 [docs/data-structures-roadmap.md](docs/data-structures-roadmap.md)，架构与全局工具选择见 [docs/architecture-decisions-roadmap.md](docs/architecture-decisions-roadmap.md)，SlopWatch 与开源工具实战见 [docs/open-source-project-labs.md](docs/open-source-project-labs.md)，通用展示空壳见 [docs/project-showcase-architecture.md](docs/project-showcase-architecture.md)。
 
 ## 内容原则
 

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="内容驱动的通用项目展示框架" />
+  <title>Project Showcase</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header><a href="#top" id="brand">PROJECT</a><nav id="module-nav"></nav></header>
+  <main id="top">
+    <section class="hero">
+      <div><p id="kicker"></p><h1 id="project-title"></h1><p id="project-summary"></p><div id="project-meta"></div></div>
+      <div id="project-metrics" class="metrics"></div>
+    </section>
+    <section class="module-header">
+      <p id="module-eyebrow"></p><h2 id="module-title"></h2><p id="module-summary"></p>
+      <div class="problem-grid"><article><small>PROBLEM</small><p id="module-problem"></p></article><article><small>OUTCOME</small><p id="module-outcome"></p></article></div>
+    </section>
+    <section><div class="section-title"><span>01</span><h2>架构与数据流</h2></div><div id="architecture-nodes" class="node-grid"></div><div id="architecture-edges" class="edge-list"></div></section>
+    <section><div class="section-title"><span>02</span><h2>关键决策</h2></div><div id="decisions" class="decision-grid"></div></section>
+    <section><div class="section-title"><span>03</span><h2>运行流程</h2></div><div id="walkthrough" class="timeline"></div></section>
+    <section><div class="section-title"><span>04</span><h2>交互实验</h2></div><div class="interactive"><div id="interaction-controls"></div><div id="interaction-result">等待选择…</div></div></section>
+    <section><div class="section-title"><span>05</span><h2>理解验收</h2></div><form id="assessment"></form><div id="assessment-result"></div></section>
+    <section><div class="section-title"><span>06</span><h2>交付证据</h2></div><div id="deliverables" class="checklist"></div></section>
+  </main>
+  <div id="config-error" hidden></div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "node server.mjs",
-    "check": "node --check app.js && node --check data/curriculum.js && node --check data/python-advanced.js && node --check data/data-structures.js && node --check data/algorithm-advanced.js && node --check data/database-lessons.js && node --check lib/expedition.js && node --check lib/progress.js && node --check server.mjs",
+    "create:showcase": "node tools/create-showcase.mjs",
+    "check:showcase": "node templates/project-showcase/tools/validate.mjs",
+    "check": "node --check app.js && node --check data/curriculum.js && node --check data/python-advanced.js && node --check data/data-structures.js && node --check data/algorithm-advanced.js && node --check data/database-lessons.js && node --check lib/expedition.js && node --check lib/progress.js && node --check server.mjs && node --check tools/create-showcase.mjs && npm run check:showcase",
     "test": "node --test"
   },
   "engines": {

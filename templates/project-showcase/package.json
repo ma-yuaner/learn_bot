@@ -1,0 +1,14 @@
+{
+  "name": "project-showcase-shell",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.mjs",
+    "check": "node --check app.js && node --check project.config.js && node --check data/modules.js && node --check lib/schema.js && node tools/validate.mjs",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
