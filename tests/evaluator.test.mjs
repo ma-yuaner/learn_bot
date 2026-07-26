@@ -83,3 +83,18 @@ def parse_score_lines(lines):
   assert.equal(result.ok, true);
   assert.ok(result.results.every((item) => item.passed));
 });
+
+test("线性查找挑战验证索引和真实比较次数", () => {
+  const result = evaluate(`
+def linear_search_with_count(items, target):
+    checks = 0
+    for index, item in enumerate(items):
+        checks = checks + 1
+        if item == target:
+            return {"index": index, "checks": checks}
+    return {"index": -1, "checks": checks}
+  `.trim(), "linear-search-count");
+  assert.equal(result.ok, true);
+  assert.equal(result.results.length, 4);
+  assert.ok(result.results.every((item) => item.passed));
+});

@@ -1,6 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { assessmentLevels, firstLesson, pythonLessons, tracks } from "../data/curriculum.js";
+import {
+  assessmentLevels,
+  dataStructureLessons,
+  firstLesson,
+  lessonCatalog,
+  pythonLessons,
+  tracks
+} from "../data/curriculum.js";
 import { simulateExpedition } from "../lib/expedition.js";
 
 test("课程地图覆盖培训主题和现代 AI 工程补充路线", () => {
@@ -63,6 +70,31 @@ test("每个 Python 关卡都符合可复用课程协议", () => {
       assert.ok(lesson.graduation.requirements.length >= 6);
     }
   }
+});
+
+test("多区域课程目录将已开放区域映射到独立关卡", () => {
+  assert.equal(lessonCatalog.python, pythonLessons);
+  assert.equal(lessonCatalog.algorithm, dataStructureLessons);
+  assert.equal(tracks.find((track) => track.id === "algorithm").available, true);
+  assert.equal(dataStructureLessons.length, 1);
+});
+
+test("数据结构 DS01 具备学习、实验、诊断、表达与代码验收闭环", () => {
+  const lesson = dataStructureLessons[0];
+  assert.equal(lesson.id, "ds-complexity");
+  assert.equal(lesson.trackId, "algorithm");
+  assert.equal(lesson.objectives.length, 4);
+  assert.ok(lesson.concepts.length >= 4);
+  assert.ok(lesson.types.some((row) => row[0] === "O(n²)"));
+  assert.ok(lesson.prediction.choices.includes(lesson.prediction.answer));
+  assert.equal(lesson.lab.kind, "complexity");
+  assert.ok(lesson.debugChallenge.choices[lesson.debugChallenge.answer]);
+  assert.ok(lesson.debugChallenge.error);
+  assert.ok(lesson.debugChallenge.result);
+  assert.ok(lesson.quiz.length >= 4);
+  assert.ok(lesson.referenceAnswer.length >= 80);
+  assert.equal(lesson.codeChallenge.id, "linear-search-count");
+  assert.match(lesson.codeChallenge.starter, /^def linear_search_with_count/);
 });
 
 test("Python 平原覆盖培训讲义后半程关键主题", () => {

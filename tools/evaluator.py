@@ -32,6 +32,15 @@ CHALLENGES = {
             {"name": "超出范围", "args": [["-1", "101", "50"]], "expected": {"scores": [50], "invalid": 2}, "visible": False},
             {"name": "小数分数", "args": [["59.5", "60.5"]], "expected": {"scores": [59.5, 60.5], "invalid": 0}, "visible": False},
         ],
+    },
+    "linear-search-count": {
+        "function": "linear_search_with_count",
+        "tests": [
+            {"name": "目标在中间", "args": [["a", "b", "c"], "b"], "expected": {"index": 1, "checks": 2}, "visible": True},
+            {"name": "目标不存在", "args": [["a", "b"], "x"], "expected": {"index": -1, "checks": 2}, "visible": True},
+            {"name": "目标在第一项", "args": [[9, 8, 7], 9], "expected": {"index": 0, "checks": 1}, "visible": False},
+            {"name": "空列表", "args": [[], 1], "expected": {"index": -1, "checks": 0}, "visible": False},
+        ],
     }
 }
 
@@ -158,6 +167,19 @@ def validate_result(challenge_id, actual):
             and isinstance(actual["passed"], bool)
         )
         return valid, "返回值必须包含 total、average、passed，且类型正确"
+
+    if challenge_id == "linear-search-count":
+        valid = (
+            isinstance(actual, dict)
+            and set(actual) == {"index", "checks"}
+            and isinstance(actual["index"], int)
+            and not isinstance(actual["index"], bool)
+            and actual["index"] >= -1
+            and isinstance(actual["checks"], int)
+            and not isinstance(actual["checks"], bool)
+            and actual["checks"] >= 0
+        )
+        return valid, "返回值必须包含 index 和 checks 两个整数，且 index 不小于 -1、checks 非负"
 
     valid = (
         isinstance(actual, dict)

@@ -1,4 +1,5 @@
 import { advancedPythonLessons } from "./python-advanced.js";
+import { dataStructureLessons } from "./data-structures.js";
 
 export const tracks = [
   {
@@ -40,7 +41,8 @@ export const tracks = [
     title: "算法迷宫",
     source: "算法与数据结构",
     description: "学习数据如何组织、算法如何衡量，并能解释每一步复杂度。",
-    chapters: ["复杂度与增长率", "数组", "单向与双向链表", "栈", "队列与双端队列", "哈希表", "二叉树", "二叉搜索树", "堆与优先队列", "图", "排序", "二分查找", "递归", "回溯", "动态规划", "工程选型与面试"]
+    chapters: ["复杂度与增长率", "数组", "单向与双向链表", "栈", "队列与双端队列", "哈希表", "二叉树", "二叉搜索树", "堆与优先队列", "图", "排序", "二分查找", "递归", "回溯", "动态规划", "工程选型与面试"],
+    available: true
   },
   {
     id: "database",
@@ -887,6 +889,13 @@ export const pythonLessons = [
   seventhLesson,
   ...advancedPythonLessons
 ];
+
+export { dataStructureLessons };
+
+export const lessonCatalog = {
+  python: pythonLessons,
+  algorithm: dataStructureLessons
+};
 
 export const assessmentLevels = [
   {

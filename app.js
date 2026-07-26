@@ -1,8 +1,10 @@
-import { assessmentLevels, pythonLessons, tracks } from "./data/curriculum.js";
+import { assessmentLevels, lessonCatalog, tracks } from "./data/curriculum.js";
 import { simulateExpedition } from "./lib/expedition.js";
 
 const storageKey = "ai-explorer-progress-v2";
 const legacyStorageKey = "ai-explorer-progress-v1";
+const defaultTrackId = "python";
+const allLessons = Object.values(lessonCatalog).flat();
 const blankLessonProgress = () => ({
   concept: false,
   prediction: false,
@@ -20,9 +22,11 @@ function loadState() {
   try {
     const stored = JSON.parse(localStorage.getItem(storageKey));
     if (stored?.lessons) {
-      for (const lesson of pythonLessons) {
+      for (const lesson of allLessons) {
         stored.lessons[lesson.id] = { ...blankLessonProgress(), ...stored.lessons[lesson.id] };
       }
+      const storedLesson = allLessons.find((lesson) => lesson.id === stored.activeLessonId);
+      stored.activeTrackId = storedLesson?.trackId || defaultTrackId;
       return stored;
     }
   } catch {
@@ -30,13 +34,14 @@ function loadState() {
   }
 
   const initial = {
-    activeLessonId: pythonLessons[0].id,
-    lessons: Object.fromEntries(pythonLessons.map((lesson) => [lesson.id, blankLessonProgress()]))
+    activeTrackId: defaultTrackId,
+    activeLessonId: lessonCatalog[defaultTrackId][0].id,
+    lessons: Object.fromEntries(allLessons.map((lesson) => [lesson.id, blankLessonProgress()]))
   };
 
   try {
     const legacy = JSON.parse(localStorage.getItem(legacyStorageKey));
-    if (legacy) initial.lessons[pythonLessons[0].id] = { ...blankLessonProgress(), ...legacy };
+    if (legacy) initial.lessons[lessonCatalog[defaultTrackId][0].id] = { ...blankLessonProgress(), ...legacy };
   } catch {
     // 旧进度迁移失败时使用全新进度。
   }
@@ -44,7 +49,11 @@ function loadState() {
 }
 
 function currentLesson() {
-  return pythonLessons.find((lesson) => lesson.id === state.activeLessonId) || pythonLessons[0];
+  return allLessons.find((lesson) => lesson.id === state.activeLessonId) || lessonCatalog[defaultTrackId][0];
+}
+
+function currentTrackLessons() {
+  return lessonCatalog[state.activeTrackId] || [];
 }
 
 function currentProgress() {
@@ -67,7 +76,7 @@ function escapeHtml(value) {
 
 function renderStaticContent() {
   document.querySelector("#track-list").innerHTML = tracks.map((track) => `
-    <button class="track-link ${track.available ? "active" : ""}" data-track="${track.id}">
+    <button class="track-link ${track.id === state.activeTrackId ? "active" : ""}" data-track="${track.id}">
       <span class="track-icon">${track.icon}</span>
       <span>${track.title}<small>${track.chapters.length} 个章节</small></span>
     </button>
@@ -79,7 +88,7 @@ function renderStaticContent() {
       <small>REGION ${String(index + 1).padStart(2, "0")}</small>
       <h3>${track.title}</h3>
       <p>${track.description}</p>
-      <small>${track.available ? `${pythonLessons.length} 个关卡已开放` : `${track.chapters.length} 个关卡 · 待解锁`}</small>
+      <small>${track.available ? `${lessonCatalog[track.id]?.length || 0} 个关卡已开放` : `${track.chapters.length} 个关卡 · 待解锁`}</small>
     </article>
   `).join("");
 
@@ -97,7 +106,7 @@ function renderStaticContent() {
 }
 
 function renderLessonSwitcher() {
-  document.querySelector("#lesson-switcher").innerHTML = pythonLessons.map((lesson, index) => {
+  document.querySelector("#lesson-switcher").innerHTML = currentTrackLessons().map((lesson, index) => {
     const progress = state.lessons[lesson.id] || blankLessonProgress();
     const lessonPassed = progress.quiz >= 80 && progress.explanation >= 60 && progress.debug;
     const projectPassed = !lesson.moduleProject || progress.project;
@@ -113,6 +122,9 @@ function renderLessonSwitcher() {
 
 function renderLesson() {
   const lesson = currentLesson();
+  const track = tracks.find((item) => item.id === lesson.trackId);
+  document.querySelector("#hero-track-label").textContent = `${track?.title || "学习区域"} · ${track?.source || ""}`;
+  document.querySelector("#lesson-switcher").setAttribute("aria-label", `${track?.title || "当前区域"}关卡`);
   document.querySelector("#lesson-title").textContent = lesson.title;
   document.querySelector("#lesson-duration").textContent = lesson.duration;
   document.querySelector(".current-mission > p").textContent = lesson.objectives[3];
@@ -333,6 +345,24 @@ function renderWorkbench(kind) {
     return;
   }
 
+  if (kind === "complexity") {
+    controls.innerHTML = `
+      <label>输入规模 n<input id="complexity-size-input" type="number" value="16" min="1" max="10000" /></label>
+      <label>增长模型
+        <select id="complexity-model-input">
+          <option value="constant">O(1) 常数</option>
+          <option value="logarithmic">O(log n) 对数</option>
+          <option value="linear" selected>O(n) 线性</option>
+          <option value="nlogn">O(n log n)</option>
+          <option value="quadratic">O(n²) 平方</option>
+        </select>
+      </label>
+      <label class="toggle-label"><input id="complexity-compare-input" type="checkbox" checked /> 同时比较全部增长模型</label>
+      <button class="primary-button" id="run-workbench">统计基本操作 <span>▶</span></button>
+    `;
+    return;
+  }
+
   controls.innerHTML = `
     <label>物品文本（逗号分隔）<input id="items-input" value="torch,map,torch,rope" /></label>
     <label>查找目标 target<input id="target-input" value="torch" maxlength="20" /></label>
@@ -366,7 +396,7 @@ function renderProgress() {
   if (currentLesson().codeChallenge) checkpointStates.push(progress.code);
   const completed = checkpointStates.filter(Boolean).length;
   const checkpointTotal = checkpointStates.length;
-  const allScores = pythonLessons.map((lesson) => {
+  const allScores = allLessons.map((lesson) => {
     const item = state.lessons[lesson.id] || blankLessonProgress();
     return Object.values(masteryScores(item)).reduce((sum, value) => sum + value, 0) / 5;
   });
@@ -681,6 +711,30 @@ function runWorkbench() {
       <div class="trace-row"><span>响应状态</span><b>${status} → ${status >= 200 && status < 300 ? "继续验证正文" : "进入协议错误分支"}</b></div>
       <div class="trace-row"><span>模式结果</span><b>r"item-(\\d+)" → ${matches.length} 项</b></div>
     `;
+  } else if (lesson.lab.kind === "complexity") {
+    const n = Math.max(1, Math.min(10000, Math.floor(Number(document.querySelector("#complexity-size-input").value) || 1)));
+    const selected = document.querySelector("#complexity-model-input").value;
+    const compareAll = document.querySelector("#complexity-compare-input").checked;
+    const models = {
+      constant: { label: "O(1)", count: () => 1 },
+      logarithmic: { label: "O(log n)", count: (size) => Math.ceil(Math.log2(Math.max(1, size))) },
+      linear: { label: "O(n)", count: (size) => size },
+      nlogn: { label: "O(n log n)", count: (size) => Math.ceil(size * Math.log2(Math.max(1, size))) },
+      quadratic: { label: "O(n²)", count: (size) => size * size }
+    };
+    const chosen = models[selected];
+    const currentCount = chosen.count(n);
+    const doubledCount = chosen.count(n * 2);
+    const keys = compareAll ? Object.keys(models) : [selected];
+    const largest = Math.max(...keys.map((key) => models[key].count(n)));
+    output = `模型：${chosen.label}\nn = ${n}：约 ${currentCount} 次基本操作\nn = ${n * 2}：约 ${doubledCount} 次\n规模翻倍，操作量约为 ${(doubledCount / currentCount).toFixed(2)} 倍`;
+    trace = keys.map((key) => {
+      const model = models[key];
+      const count = model.count(n);
+      const width = Math.max(3, Math.round((count / largest) * 100));
+      return `<div class="trace-row"><span>${model.label}</span><b>${count} 次 · ${width}% 相对长度</b></div>`;
+    }).join("");
+    trace += `<div class="trace-row"><span>分析口径</span><b>用基本操作近似最坏情况；不是实际毫秒数</b></div>`;
   } else {
     const change = document.querySelector("#change-input").value;
     const tested = document.querySelector("#tests-input").checked;
@@ -820,8 +874,9 @@ function bindGlobalInteractions() {
     localStorage.removeItem(storageKey);
     localStorage.removeItem(legacyStorageKey);
     state = {
-      activeLessonId: pythonLessons[0].id,
-      lessons: Object.fromEntries(pythonLessons.map((lesson) => [lesson.id, blankLessonProgress()]))
+      activeTrackId: defaultTrackId,
+      activeLessonId: lessonCatalog[defaultTrackId][0].id,
+      lessons: Object.fromEntries(allLessons.map((lesson) => [lesson.id, blankLessonProgress()]))
     };
     renderLesson();
     toast("全部本地进度已重置");
@@ -829,8 +884,17 @@ function bindGlobalInteractions() {
 
   document.querySelectorAll(".track-link").forEach((button) => {
     button.addEventListener("click", () => {
-      if (button.dataset.track === "python") document.querySelector("#concepts").scrollIntoView();
-      else {
+      const lessons = lessonCatalog[button.dataset.track];
+      if (lessons?.length) {
+        state.activeTrackId = button.dataset.track;
+        state.activeLessonId = lessons[0].id;
+        document.querySelectorAll(".track-link").forEach((item) => {
+          item.classList.toggle("active", item.dataset.track === state.activeTrackId);
+        });
+        saveState();
+        renderLesson();
+        document.querySelector("#concepts").scrollIntoView();
+      } else {
         const track = tracks.find((item) => item.id === button.dataset.track);
         toast(`${track.title}正在开发，已规划 ${track.chapters.length} 个章节`);
       }
