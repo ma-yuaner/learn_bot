@@ -29,7 +29,7 @@ async function readJsonBody(request) {
   return JSON.parse(Buffer.concat(chunks).toString("utf8"));
 }
 
-async function evaluatePython(request, response) {
+async function evaluateSubmission(request, response, evaluatorFile, missingRuntimeMessage) {
   let payload;
   try {
     payload = await readJsonBody(request);
@@ -41,7 +41,7 @@ async function evaluatePython(request, response) {
     return;
   }
 
-  const evaluator = spawn("python3", ["-I", "-S", join(root, "tools/evaluator.py")], {
+  const evaluator = spawn("python3", ["-I", "-S", join(root, evaluatorFile)], {
     cwd: root,
     env: { PATH: process.env.PATH || "/usr/bin:/bin" },
     stdio: ["pipe", "pipe", "pipe"]
@@ -54,7 +54,7 @@ async function evaluatePython(request, response) {
   evaluator.stderr.on("data", (chunk) => { stderr += chunk; });
   evaluator.on("error", () => {
     clearTimeout(timeout);
-    sendJson(response, 503, { ok: false, message: "本机未找到 Python 3 执行环境" });
+    sendJson(response, 503, { ok: false, message: missingRuntimeMessage });
   });
   evaluator.on("close", (code) => {
     clearTimeout(timeout);
@@ -75,7 +75,11 @@ async function evaluatePython(request, response) {
 createServer(async (request, response) => {
   const pathname = decodeURIComponent(new URL(request.url, "http://localhost").pathname);
   if (request.method === "POST" && pathname === "/api/evaluate") {
-    await evaluatePython(request, response);
+    await evaluateSubmission(request, response, "tools/evaluator.py", "本机未找到 Python 3 执行环境");
+    return;
+  }
+  if (request.method === "POST" && pathname === "/api/evaluate-sql") {
+    await evaluateSubmission(request, response, "tools/sql_evaluator.py", "本机未找到 SQL 教学沙箱运行环境");
     return;
   }
   if (request.method !== "GET") {

@@ -7,7 +7,7 @@
     "dev": "node server.mjs",
     "create:showcase": "node tools/create-showcase.mjs",
     "check:showcase": "node templates/project-showcase/tools/validate.mjs",
-    "check": "node --check app.js && node --check data/curriculum.js && node --check data/python-advanced.js && node --check data/data-structures.js && node --check data/algorithm-advanced.js && node --check data/database-lessons.js && node --check lib/expedition.js && node --check lib/progress.js && node --check server.mjs && node --check tools/create-showcase.mjs && npm run check:showcase",
+    "check": "node --check app.js && node --check data/curriculum.js && node --check data/python-advanced.js && node --check data/data-structures.js && node --check data/algorithm-advanced.js && node --check data/database-lessons.js && node --check lib/expedition.js && node --check lib/progress.js && node --check server.mjs && node --check tools/create-showcase.mjs && python3 -c \"compile(open('tools/sql_evaluator.py', encoding='utf-8').read(), 'tools/sql_evaluator.py', 'exec')\" && npm run check:showcase",
     "test": "node --test"
   },
   "engines": {

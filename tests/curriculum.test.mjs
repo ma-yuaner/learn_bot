@@ -82,19 +82,32 @@ test("多区域课程目录将已开放区域映射到独立关卡", () => {
   assert.equal(dataStructureLessons.length, 16);
 });
 
-test("数据库 DB01 覆盖关系模型、约束、实验和解释评估", () => {
-  assert.equal(databaseLessons.length, 1);
+test("数据库 DB01–DB08 形成 MySQL 学习、实操、验收与毕业闭环", () => {
+  assert.equal(databaseLessons.length, 8);
+  assert.deepEqual(databaseLessons.map((lesson) => lesson.title.slice(0, 4)), [
+    "DB01", "DB02", "DB03", "DB04", "DB05", "DB06", "DB07", "DB08"
+  ]);
+  for (const item of databaseLessons) {
+    assert.equal(item.trackId, "database");
+    assert.equal(item.objectives.length, 4);
+    assert.ok(item.concepts.length >= 4);
+    assert.ok(item.types.length >= 4);
+    assert.ok(item.prediction.choices.includes(item.prediction.answer));
+    assert.ok(item.lab.kind);
+    assert.ok(item.debugChallenge.choices[item.debugChallenge.answer]);
+    assert.ok(item.quiz.length >= 4);
+    assert.ok(item.referenceAnswer.length >= 120);
+    assert.equal(item.codeChallenge.language, "sql");
+    assert.match(item.codeChallenge.starter, /(SELECT|CREATE|BEGIN)/);
+    assert.ok(item.codeChallenge.checks.length >= 4);
+    assert.ok(item.evaluationGroups.length >= 6);
+  }
   const lesson = databaseLessons[0];
   assert.equal(lesson.id, "db-relational-model");
-  assert.equal(lesson.trackId, "database");
-  assert.equal(lesson.objectives.length, 4);
   assert.ok(lesson.concepts.some((item) => item.term === "主键"));
   assert.ok(lesson.types.some((row) => row[0] === "DECIMAL"));
   assert.equal(lesson.lab.kind, "relational-model");
-  assert.ok(lesson.prediction.choices.includes(lesson.prediction.answer));
-  assert.ok(lesson.debugChallenge.choices[lesson.debugChallenge.answer]);
-  assert.ok(lesson.quiz.length >= 4);
-  assert.ok(lesson.referenceAnswer.length >= 120);
+  assert.equal(databaseLessons.at(-1).graduation.requirements.length, 8);
 });
 
 test("数据结构 DS01 具备学习、实验、诊断、表达与代码验收闭环", () => {

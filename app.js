@@ -144,6 +144,7 @@ function renderLesson() {
     <div class="type-row"><code>${row[0]}</code><b>${row[1]}</b><span>${row[2]}</span><span>${row[3]}</span></div>
   `).join("");
   document.querySelector("#prediction-code").textContent = lesson.prediction.code;
+  document.querySelector("#prediction-file").textContent = lesson.trackId === "database" ? "predict.sql" : "mission.py";
   document.querySelector("#prediction-choices").innerHTML = lesson.prediction.choices.map((choice) =>
     `<button class="choice" data-answer="${choice}">${choice}</button>`
   ).join("");
@@ -156,6 +157,7 @@ function renderLesson() {
   document.querySelector("#state-trace").innerHTML = "";
 
   document.querySelector("#debug-code").textContent = lesson.debugChallenge.code;
+  document.querySelector("#debug-file").textContent = lesson.trackId === "database" ? "broken.sql" : "broken.py";
   document.querySelector("#debug-question").textContent = lesson.debugChallenge.question;
   document.querySelector("#debug-choices").innerHTML = lesson.debugChallenge.choices.map((choice, index) =>
     `<button class="choice" data-debug-answer="${index}">${choice}</button>`
@@ -208,6 +210,13 @@ function renderCodeChallenge(lesson) {
     .map((item) => `<li>${item}</li>`)
     .join("");
   document.querySelector("#learner-code").value = lesson.codeChallenge.starter;
+  const language = lesson.codeChallenge.language || "python";
+  document.querySelector("#code-challenge-language").textContent = language === "sql" ? "SQL SANDBOX" : "LOCAL SANDBOX";
+  document.querySelector("#code-challenge-note").textContent = language === "sql"
+    ? "练习在一次性内存数据库中执行，不接触真实数据。判题覆盖通用关系 SQL；MySQL 8 特有语法会在正文中单独说明。"
+    : "教学沙箱会拒绝导入、文件访问、动态属性和危险调用，并限制运行时间与资源。它仍是本地原型，不用于公网多租户执行。";
+  document.querySelector("#code-editor-file").textContent = language === "sql" ? "solution.sql" : "solution.py";
+  document.querySelector("#learner-code").setAttribute("aria-label", language === "sql" ? "SQL 答题代码" : "Python 答题代码");
   document.querySelector("#runner-status").textContent = "等待提交";
   document.querySelector("#code-results").innerHTML = "";
 }
@@ -435,6 +444,19 @@ function renderWorkbench(kind) {
 2,小智,95
 2,小新,</textarea></label>
       <button class="primary-button" id="run-workbench">检查关系模式 <span>▶</span></button>
+    `;
+    return;
+  }
+
+  if (kind === "mysql-scenario") {
+    const lab = currentLesson().lab;
+    controls.innerHTML = `
+      <label>选择实验场景
+        <select id="mysql-scenario-input">
+          ${lab.scenarios.map((item, index) => `<option value="${index}">${escapeHtml(item.label)}</option>`).join("")}
+        </select>
+      </label>
+      <button class="primary-button" id="run-workbench">推演执行链路 <span>▶</span></button>
     `;
     return;
   }
@@ -1349,6 +1371,12 @@ function runWorkbench() {
       <div class="trace-row"><span>NULL 口径</span><b>空单元格表示未知/不适用，不等于 0 或空字符串业务值</b></div>
       <div class="trace-row"><span>最终结论</span><b>${errors.length ? escapeHtml(errors.join("；")) : "模式与样例数据一致"}</b></div>
     `;
+  } else if (lesson.lab.kind === "mysql-scenario") {
+    const scenario = lesson.lab.scenarios[Number(document.querySelector("#mysql-scenario-input").value)] || lesson.lab.scenarios[0];
+    output = `${scenario.sql}\n\n执行结果：\n${scenario.result}\n\n判断：${scenario.conclusion}`;
+    trace = scenario.trace.map((item, index) => `
+      <div class="trace-row"><span>步骤 ${index + 1}</span><b>${escapeHtml(item)}</b></div>
+    `).join("");
   } else {
     const change = document.querySelector("#change-input").value;
     const tested = document.querySelector("#tests-input").checked;
@@ -1409,7 +1437,7 @@ async function submitLearnerCode() {
   resultsNode.innerHTML = "";
 
   try {
-    const response = await fetch("/api/evaluate", {
+    const response = await fetch(lesson.codeChallenge.language === "sql" ? "/api/evaluate-sql" : "/api/evaluate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
